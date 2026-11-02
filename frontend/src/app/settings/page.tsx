@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useFinShield, type ThemeAccentToken } from '@/context/FinShieldContext';
 import { PageHeader } from '@/components/primitives';
+import { API } from '@/lib/account-api';
 
 const ACCENT_PRESETS: Array<{ id: ThemeAccentToken; label: string; hex: string }> = [
   { id: 'obsidian', label: 'Black', hex: '#1C1C1E' },
@@ -14,8 +16,6 @@ const ACCENT_PRESETS: Array<{ id: ThemeAccentToken; label: string; hex: string }
 const inputCls =
   'w-full h-11 px-4 rounded-[16px] bg-[#F5F5F7] text-[14px] text-[#1C1C1E] placeholder:text-[#8E8E93] outline-none focus:ring-2 focus:ring-[#1C1C1E]/20';
 const labelCls = 'text-[13px] text-[#636366] block mb-1.5';
-const primaryBtn =
-  'inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer';
 const secondaryBtn =
   'inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#F5F5F7] text-[#1C1C1E] text-[14px] font-medium cursor-pointer hover:bg-[#EBEBED]';
 
@@ -24,39 +24,26 @@ export default function SettingsPage() {
     state,
     updateProfile,
     updateSettings,
-    updateAwsConfig,
-    syncWithAwsCloud,
     resetDemoVault,
   } = useFinShield();
-
-  const [awsAccessKey, setAwsAccessKey] = useState(state.awsConfig.accessKeyId || '');
-  const [awsSecretKey, setAwsSecretKey] = useState(state.awsConfig.secretAccessKey || '');
-  const [awsSessionToken, setAwsSessionToken] = useState(state.awsConfig.sessionToken || '');
-  const [awsRegion, setAwsRegion] = useState(state.awsConfig.region || 'ap-south-1');
-  const [s3Bucket, setS3Bucket] = useState(state.awsConfig.s3Bucket || 'finshield-vault-artifacts');
-  const [dynamoTable, setDynamoTable] = useState(state.awsConfig.dynamoTable || 'FinShieldLedger');
-  const [bedrockModel, setBedrockModel] = useState(
-    state.awsConfig.bedrockModelId || 'anthropic.claude-3-5-haiku-20241022-v1:0'
-  );
-  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const router = useRouter();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [engine, setEngine] = useState<{ ollama: boolean; model: string } | null>(null);
 
-  const handleSaveAwsConfig = async (e: React.FormEvent) => {
-    e.preventDefault();
-    updateAwsConfig({
-      enabled: Boolean(awsAccessKey.trim() && awsSecretKey.trim()),
-      region: awsRegion,
-      accessKeyId: awsAccessKey.trim(),
-      secretAccessKey: awsSecretKey.trim(),
-      sessionToken: awsSessionToken.trim() || undefined,
-      s3Bucket: s3Bucket.trim(),
-      dynamoTable: dynamoTable.trim(),
-      bedrockModelId: bedrockModel.trim(),
-    });
-    const res = await syncWithAwsCloud();
-    setSyncMessage(res.message);
-    setTimeout(() => setSyncMessage(null), 4000);
-  };
+  useEffect(() => {
+    let live = true;
+    fetch(`${API}/health`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (live && data) setEngine({ ollama: Boolean(data.ollama), model: String(data.model || '') });
+      })
+      .catch(() => {
+        if (live) setEngine(null);
+      });
+    return () => {
+      live = false;
+    };
+  }, []);
 
   const handleExportLedgerCsv = () => {
     const headers = ['ID,Date,Time,Merchant,Category,Type,AmountINR,PaymentMethod,OCRVerified'];
@@ -196,12 +183,13 @@ export default function SettingsPage() {
             <div className="pt-2">
               {confirmReset ? (
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[13px] text-[#636366]">Erase all data and restore the demo?</span>
+                  <span className="text-[13px] text-[#636366]">Erase all data on this device and sign out?</span>
                   <button
                     type="button"
                     onClick={() => {
                       resetDemoVault();
                       setConfirmReset(false);
+                      router.replace('/signin');
                     }}
                     className="inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#FF453A]/15 text-[#D70015] text-[14px] font-medium cursor-pointer"
                   >
@@ -223,55 +211,18 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          <details className="bento-pod p-5 sm:p-6 group">
-            <summary className="text-[17px] font-semibold cursor-pointer min-h-[44px] flex items-center justify-between list-none">
-              Advanced: cloud connection
-              <span className="text-[13px] font-normal text-[#636366]">
-                {state.awsConfig.enabled ? 'Connected' : 'Not connected'}
+          <section className="bento-pod p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-[17px] font-semibold">Local engine</h2>
+              <span className="text-[13px] text-[#636366]">
+                {engine ? (engine.ollama ? 'Ollama ready' : 'SQLite only') : 'Checking'}
               </span>
-            </summary>
-            <form onSubmit={handleSaveAwsConfig} className="space-y-4 mt-4">
-              <p className="text-[13px] text-[#636366]">
-                Optional. Add cloud credentials to use live cloud services instead of the built-in demo mode.
-              </p>
-              {syncMessage && (
-                <div role="status" className="p-3 rounded-[16px] bg-[#32D74B]/15 text-[#1E8E3E] text-[13px]">
-                  {syncMessage}
-                </div>
-              )}
-              <div>
-                <label htmlFor="aws-ak" className={labelCls}>Access key ID</label>
-                <input id="aws-ak" type="text" autoComplete="off" value={awsAccessKey} onChange={(e) => setAwsAccessKey(e.target.value)} className={inputCls} />
-              </div>
-              <div>
-                <label htmlFor="aws-sk" className={labelCls}>Secret access key</label>
-                <input id="aws-sk" type="password" autoComplete="off" value={awsSecretKey} onChange={(e) => setAwsSecretKey(e.target.value)} className={inputCls} />
-              </div>
-              <div>
-                <label htmlFor="aws-st" className={labelCls}>Session token (optional)</label>
-                <input id="aws-st" type="password" autoComplete="off" value={awsSessionToken} onChange={(e) => setAwsSessionToken(e.target.value)} className={inputCls} />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="aws-rg" className={labelCls}>Region</label>
-                  <input id="aws-rg" type="text" value={awsRegion} onChange={(e) => setAwsRegion(e.target.value)} className={inputCls} />
-                </div>
-                <div>
-                  <label htmlFor="aws-s3" className={labelCls}>Storage bucket</label>
-                  <input id="aws-s3" type="text" value={s3Bucket} onChange={(e) => setS3Bucket(e.target.value)} className={inputCls} />
-                </div>
-                <div>
-                  <label htmlFor="aws-db" className={labelCls}>Database table</label>
-                  <input id="aws-db" type="text" value={dynamoTable} onChange={(e) => setDynamoTable(e.target.value)} className={inputCls} />
-                </div>
-                <div>
-                  <label htmlFor="aws-md" className={labelCls}>AI model ID</label>
-                  <input id="aws-md" type="text" value={bedrockModel} onChange={(e) => setBedrockModel(e.target.value)} className={inputCls} />
-                </div>
-              </div>
-              <button type="submit" className={primaryBtn}>Save and test connection</button>
-            </form>
-          </details>
+            </div>
+            <p className="text-[13px] text-[#636366] mt-3">
+              Accounts, receipts, and statement summaries stay in SQLite on this machine.
+              {engine?.model ? ` Summaries use ${engine.model}.` : ''}
+            </p>
+          </section>
         </div>
       </div>
     </div>

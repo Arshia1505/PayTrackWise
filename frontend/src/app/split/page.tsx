@@ -44,11 +44,11 @@ function UpiSplitAndCollectionsContent() {
     sendCollectionReminder,
   } = useFinShield();
 
-  const [merchant, setMerchant] = useState<string>('Church Street Social');
-  const [totalBill, setTotalBill] = useState<number>(4250);
-  const [invoiceRef, setInvoiceRef] = useState<string>('INV-88412');
-  const [receiverVpa, setReceiverVpa] = useState<string>(state.profile.upiVpa || 'arjun@okicici');
-  const [receiverName] = useState<string>(state.profile.name || 'Arjun Mehta');
+  const [merchant, setMerchant] = useState<string>('');
+  const [totalBill, setTotalBill] = useState<number>(0);
+  const [invoiceRef, setInvoiceRef] = useState<string>('');
+  const [receiverVpa, setReceiverVpa] = useState<string>(state.profile.upiVpa || '');
+  const [receiverName] = useState<string>(state.profile.name || '');
   const [splitMode, setSplitMode] = useState<'equal' | 'exact'>('equal');
   const [budgetProtectionShield, setBudgetProtectionShield] = useState<boolean>(true);
   const [activeFriendPreviewId, setActiveFriendPreviewId] = useState<string>('m1');

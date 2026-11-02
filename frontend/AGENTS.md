@@ -10,7 +10,7 @@
 - **Stitch Project ID**: `4554961395624386665`
 - **Framework**: Next.js 15 (App Router, TypeScript, React 19, Tailwind CSS)
 - **Deployment Target**: Vercel (Serverless API Routes + Static/Dynamic App Router pages)
-- **Cloud Backend**: AWS Cloud Stack (**Amazon Bedrock**, **Amazon Textract**, **Amazon S3**, **Amazon DynamoDB**) via zero-dependency native AWS Signature V4 (`HMAC-SHA256`) in [`src/lib/aws-cloud.ts`](./src/lib/aws-cloud.ts), paired with a deterministic **Hybrid Local Fallback** (`localStorage` key: `finshield_vault_state_v2`).
+- **Local Backend**: FastAPI on `http://127.0.0.1:8000` with SQLite (`backend/data/paytrackwise.db`) and Ollama (`llama3:8b` at `http://127.0.0.1:11434`). Statement summaries and receipt structuring go through Python. The ledger also stays in `localStorage` (`finshield_vault_state_v27`).
 - **Web3 / Crypto Rail**: **Solana Testnet (`https://api.testnet.solana.com`) & Devnet** with Phantom Wallet (`window.solana`) support, Solana Pay QR generation (`solana:<recipient>?amount=...`), and a UPI-style multi-user **`username#crypt` Handle Registry**.
 - **Currency & Locale**: Indian Rupees (`₹`, `en-IN` lakh/crore grouping: `₹1,25,000`, tabular numerals `JetBrains Mono` / `tabular-nums`).
 
@@ -22,7 +22,7 @@
 /home/akinchan/Documents/Projects/FinProj/
 ├── AGENTS.md                        # Complete AI Agent & Developer Context Export (this file)
 ├── TODO.md                          # Completed items [x] and Remaining TODOs [ ]
-├── AWS_SETUP_GUIDE.md               # Step-by-step AWS CLI, IAM, S3, DynamoDB, Bedrock & Vercel setup
+├── ../backend/                      # FastAPI, SQLite, Ollama (accounts, OCR, summaries)
 ├── package.json                     # Next.js 15, React 19, Tailwind CSS, TypeScript scripts
 ├── fetch_designs.py                 # Stitch MCP downloader script used to pull raw designs
 ├── designs/                         # Raw Google Stitch Project (ID: 4554961395624386665) exports
@@ -37,7 +37,7 @@
 │   │   ├── globals.css              # Design tokens (--bg-canvas, --bg-pod, --signal-*, .bento-pod)
 │   │   ├── page.tsx                 # Scene 1: Home Insights Dashboard
 │   │   ├── transactions/page.tsx    # Scene 2: Transactions Ledger & Rapid Input
-│   │   ├── ocr/page.tsx             # Scene 3: OCR Bill Scanner & Review (AWS Textract + S3)
+│   │   ├── ocr/page.tsx             # Scene 3: OCR Bill Scanner (local Tesseract + Ollama)
 │   │   ├── analytics/page.tsx       # Scene 4: Spending Analytics
 │   │   ├── budgets/page.tsx         # Scene 5: Monthly Budget Planner (Hero Arc & 3x2 Bento)
 │   │   ├── goals/page.tsx           # Scenes 6 & 7: Savings Goals & Debt/EMI Tracker
@@ -45,24 +45,20 @@
 │   │   ├── ml-shield/page.tsx       # Scene 9: ML Shield Statistical Z-Score Anomaly Guard
 │   │   ├── notifications/page.tsx   # Scene 10: Notifications Center
 │   │   ├── login/page.tsx           # Scene 11: Login & Registration
-│   │   ├── settings/page.tsx        # Scene 12: Profile, #crypt Identity & AWS Cloud Configurator
+│   │   ├── settings/page.tsx        # Scene 12: Profile and local engine status
 │   │   ├── split/page.tsx           # Scene 13: Dynamic UPI QR, WhatsApp Split & Pending Collections
 │   │   ├── subscriptions/page.tsx   # Expansion: Digital Subscriptions vs. Utility Bills Hub
-│   │   ├── import-csv/page.tsx      # Expansion: Bank Statement CSV Import & Bedrock AI Analyzer
+│   │   ├── import-csv/page.tsx      # Expansion: Bank Statement CSV Import & Ollama summary
 │   │   ├── crypto/page.tsx          # Expansion: Solana Testnet P2P & username#crypt Handle Registry
 │   │   └── api/
-│   │       ├── ai/analyze-csv/route.ts    # POST: S3 CSV archival + Bedrock AI analysis
-│   │       ├── ocr/scan/route.ts          # POST: S3 receipt archival + Textract AnalyzeExpense
-│   │       ├── aws/sync/route.ts          # GET/POST: DynamoDB vault state PutItem sync
-│   │       └── crypto/directory/route.ts  # GET/POST: Multi-user username#crypt registry + DynamoDB
+│   │       └── crypto/directory/route.ts  # GET/POST: Multi-user username#crypt registry
 │   ├── components/
 │   │   ├── AppShell.tsx             # Top header, Floating Glass Pill Dock, Universal Quick-Add Modal
 │   │   └── primitives/index.tsx     # 6 DRY Modular UI Primitives + ISO/IEC 18004 QR SVG renderer
 │   ├── context/
-│   │   └── FinShieldContext.tsx     # Global reactive state, cross-module sync, AWS & #crypt actions
+│   │   └── FinShieldContext.tsx     # Global reactive state, cross-module sync, #crypt actions
 │   └── lib/
-│       ├── finance-engine.ts        # Core math, ISO QR encoder, RFC-4180 CSV parser, Solana Testnet RPC
-│       └── aws-cloud.ts             # Native AWS Signature V4 client (Bedrock, Textract, S3, DynamoDB)
+│       └── finance-engine.ts        # Core math, ISO QR encoder, RFC-4180 CSV parser, Solana Testnet RPC
 └── tests/
     └── finance-engine.test.mjs      # Node native test runner suite (`npm test`)
 ```
@@ -145,12 +141,11 @@ All 16 raw Stitch screens are stored in [`designs/`](./designs/):
   - `fetchSolanaTestnetBalance(walletAddress, cluster, fallbackSol)` & `requestSolanaTestnetAirdrop(walletAddress, solAmount, cluster)` — Performs live JSON-RPC calls (`getBalance`, `requestAirdrop`) to Solana Testnet with instant fallback.
   - `buildCryptoPaymentUri({ symbol, recipientAddress, recipientHandle, tokenAmount, memo })` — Builds Solana Pay URIs (`solana:<address>?amount=...&spl-token=...&label=...&message=...&memo=...`).
 
-### B. AWS Cloud SigV4 Engine ([`src/lib/aws-cloud.ts`](./src/lib/aws-cloud.ts))
-- `signAwsV4Request(opts)` — Pure Node `crypto` AWS Signature V4 signer supporting `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and optional `AWS_SESSION_TOKEN` (`x-amz-security-token`).
-- `archiveArtifactToS3(objectKey, content, contentType, configOverride)` — Uploads receipts & CSV statements to S3 (`s3://{bucket}/{key}`).
-- `invokeBedrockModel(prompt, configOverride)` — Supports both Anthropic Claude (`anthropic.claude-3-5-haiku-20241022-v1:0`, `claude-3-5-sonnet`) and Amazon Nova (`amazon.nova-lite-v1:0`, `amazon.nova-pro-v1:0`) payload schemas.
-- `analyzeReceiptWithTextract(fileName, base64Image, configOverride)` — Calls `Textract.AnalyzeExpense` and parses `ExpenseDocuments` summary fields and line items.
-- `syncEntityToDynamoDB(entityType, entityId, payload, configOverride)` — Writes `{ PK: "${entityType}#${entityId}", UpdatedAt, PayloadJson }` to DynamoDB table `FinShieldLedger`.
+### B. Local Python API (`../backend`)
+- `POST /ai/summary` — Ollama writes three bullets. If Ollama is down, the same prompt is served from the SQLite `ai_insights` table.
+- `POST /ocr/scan` — Saves the receipt under `backend/data/receipts`, reads it with the local `tesseract` binary when it is installed, then asks Ollama for merchant, date, tax, and line items. Unreadable photos stay blank for manual entry.
+- `POST /ledger/snapshot` — Stores a short ledger snapshot in SQLite.
+- `GET /health` — Reports SQLite and whether Ollama answers.
 
 ### C. Global Reactive Context ([`src/context/FinShieldContext.tsx`](./src/context/FinShieldContext.tsx))
 Cross-module actions that automatically keep Transactions, Monthly Budgets, Pending Collections, Notifications, and the `#crypt` Directory in sync:
@@ -165,7 +160,7 @@ Cross-module actions that automatically keep Transactions, Monthly Budgets, Pend
 - `markCollectionSettled(id)` / `addPendingCollection(item)` / `sendCollectionReminder(id)`
 - `recordCryptoTransfer(tx)`
 - `registerOrUpdateCryptUser(input)` / `switchActiveCryptUser(handleOrId)` / `creditTestnetAirdrop(solAmount, signature?)`
-- `syncWithAwsCloud()`
+- `saveLedgerLocally()`
 
 ---
 
@@ -195,4 +190,4 @@ See [`TODO.md`](./TODO.md) for the prioritized checklist of remaining enhancemen
 1. Wire `username#crypt` handle + Solana Testnet wallet registration fields directly into the `/login` Sign-Up form ([`src/app/login/page.tsx`](./src/app/login/page.tsx)).
 2. Add on-chain transaction wire serialization (`SystemProgram.transfer` / SPL Token transfer) with `window.solana.signAndSendTransaction` on Solana Testnet in [`src/app/crypto/page.tsx`](./src/app/crypto/page.tsx).
 3. Add unit tests specifically for the `#crypt` directory API & handle resolution helpers in [`tests/finance-engine.test.mjs`](./tests/finance-engine.test.mjs).
-4. Add DynamoDB read hydration (`GetItem` / `Query`) on cold start in [`src/lib/aws-cloud.ts`](./src/lib/aws-cloud.ts).
+4. Keep statement summaries and receipt reads on the local FastAPI service. Do not add a cloud document or model provider.

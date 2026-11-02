@@ -6,7 +6,7 @@ import { PageHeader, InsetGroupedList } from '@/components/primitives';
 import { formatINR } from '@/lib/finance-engine';
 
 export default function UnusualSpendingPage() {
-  const { state, syncWithAwsCloud } = useFinShield();
+  const { state, saveLedgerLocally } = useFinShield();
   const [sensitivitySigma, setSensitivitySigma] = useState<number>(2.5);
   const [auditOutput, setAuditOutput] = useState<string | null>(null);
   const [runningAudit, setRunningAudit] = useState(false);
@@ -18,7 +18,7 @@ export default function UnusualSpendingPage() {
   const runCheck = async () => {
     setRunningAudit(true);
     try {
-      await syncWithAwsCloud();
+      await saveLedgerLocally();
       setAuditOutput(
         `Checked ${state.transactions.length} transactions. ${flaggedTransactions.length} look unusual.`
       );

@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useFinShield } from '@/context/FinShieldContext';
 import { UniversalSheetModal } from '@/components/primitives';
 import { formatINR } from '@/lib/finance-engine';
+import { readSession } from '@/lib/session';
 
 const QUICK_CATEGORIES = [
   'Groceries',
@@ -36,7 +37,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [syncingToast, setSyncingToast] = useState<string | null>(null);
 
   const [moreOpen, setMoreOpen] = useState(false);
+  const [allowed, setAllowed] = useState(false);
   useEffect(() => setMoreOpen(false), [pathname]);
+
+  const isPublic =
+    pathname === '/' ||
+    pathname === '/signin' ||
+    pathname === '/signup' ||
+    pathname === '/onboarding' ||
+    pathname === '/login';
+
+  useEffect(() => {
+    const session = readSession();
+    if (!session && !isPublic) {
+      router.replace('/signin');
+      setAllowed(false);
+      return;
+    }
+    if (session && !session.onboarded && pathname !== '/onboarding' && pathname !== '/' && pathname !== '/signin' && pathname !== '/signup') {
+      router.replace('/onboarding');
+      setAllowed(false);
+      return;
+    }
+    if (session && (pathname === '/signin' || pathname === '/signup' || pathname === '/login')) {
+      router.replace(session.onboarded ? '/dashboard' : '/onboarding');
+      return;
+    }
+    setAllowed(true);
+  }, [pathname, router, isPublic]);
 
   const unreadNotifications = state.notifications.filter((n) => !n.read).length;
 
@@ -89,11 +117,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
 
-  // Hide chrome on standalone login canvas if desired, or keep minimal navigation bar
-  const isLoginRoute = pathname === '/login';
-
   const primaryNav = [
-    { href: '/', label: 'Overview' },
+    { href: '/dashboard', label: 'Overview' },
     { href: '/transactions', label: 'Transactions' },
     { href: '/budgets', label: 'Budgets' },
     { href: '/subscriptions', label: 'Bills' },
@@ -105,22 +130,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: '/ocr', label: 'Scan a bill' },
     { href: '/import-csv', label: 'Import statement' },
     { href: '/crypto', label: 'Send crypto' },
+    { href: '/score', label: 'Generic Score' },
     { href: '/ml-shield', label: 'Unusual spending' },
     { href: '/settings', label: 'Settings' },
   ];
   const isActive = (href: string) =>
-    href === '/' ? pathname === '/' || pathname === '/analytics' : pathname.startsWith(href);
-  const moreActive = moreNav.some((i) => isActive(i.href));
+    href === '/dashboard'
+      ? pathname === '/dashboard' || pathname === '/analytics'
+      : pathname.startsWith(href);
 
-  if (isLoginRoute) {
-    return <div className="min-h-screen bg-white text-[#1C1C1E]">{children}</div>;
+  if (isPublic) {
+    return <>{children}</>;
   }
+
+  if (!allowed) {
+    return null;
+  }
+  const moreActive = moreNav.some((i) => isActive(i.href));
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#1C1C1E]">
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl">
         <div className="max-w-[1024px] mx-auto px-4 sm:px-8 h-14 flex items-center gap-6">
-          <Link href="/" className="text-[17px] font-semibold tracking-tight shrink-0">
+          <Link href="/dashboard" className="text-[17px] font-semibold tracking-tight shrink-0">
             FinShield
           </Link>
 

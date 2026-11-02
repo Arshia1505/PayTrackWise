@@ -1,212 +1,315 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useFinShield } from '@/context/FinShieldContext';
-import {
-  PageHeader,
-  DynamicQrSvg,
-  InsetGroupedList,
-} from '@/components/primitives';
+import { PageHeader, DynamicQrSvg, InsetGroupedList } from '@/components/primitives';
 import {
   CRYPTO_TOKENS,
   buildCryptoPaymentUri,
   convertInrToCrypto,
   formatINR,
+  generateDeterministicTestnetWallet,
+  isValidSolanaAddress,
+  normalizeCryptHandle,
+  resolveCryptHandle,
 } from '@/lib/finance-engine';
-
-interface PeerContact {
-  id: string;
-  name: string;
-  snsHandle: string;
-  solanaAddress: string;
-  defaultInr: number;
-}
-
-const PEER_CONTACTS: PeerContact[] = [
-  {
-    id: 'peer-1',
-    name: 'Rohan Kulkarni',
-    snsHandle: 'rohan.sol',
-    solanaAddress: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
-    defaultInr: 1417,
-  },
-  {
-    id: 'peer-2',
-    name: 'Priya Nair',
-    snsHandle: 'priya.sol',
-    solanaAddress: '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin',
-    defaultInr: 1630,
-  },
-  {
-    id: 'peer-3',
-    name: 'Vikram Singh',
-    snsHandle: 'vikram.sol',
-    solanaAddress: '3yMK9YpL7vWq2R8xN4tZc5bH6jK1mP9sD4fG7hJ2kL4',
-    defaultInr: 850,
-  },
-];
 
 const inputCls =
   'w-full h-11 px-4 rounded-[16px] bg-white text-[14px] text-[#1C1C1E] placeholder:text-[#8E8E93] outline-none focus:ring-2 focus:ring-[#1C1C1E]/20';
 const labelCls = 'text-[13px] text-[#636366] block mb-1.5';
 const primaryBtn =
-  'inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer';
+  'inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer disabled:opacity-40';
 const secondaryBtn =
   'inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#F5F5F7] text-[#1C1C1E] text-[14px] font-medium cursor-pointer hover:bg-[#EBEBED]';
 
+function shortAddress(address: string) {
+  if (address.length < 12) return address;
+  return `${address.slice(0, 4)}…${address.slice(-4)}`;
+}
+
 export default function CryptoPage() {
-  const { state, recordCryptoTransfer } = useFinShield();
+  const { state, recordCryptoTransfer, registerOrUpdateCryptUser } = useFinShield();
+  const profile = state.profile;
 
+  const [myHandle, setMyHandle] = useState(profile.cryptHandle);
+  const [myWallet, setMyWallet] = useState(profile.solanaWallet);
+  const [payTo, setPayTo] = useState('');
   const [selectedSymbol, setSelectedSymbol] = useState<'SOL' | 'USDC' | 'USDT'>('SOL');
-  const [selectedPeerId, setSelectedPeerId] = useState<string>('peer-1');
-  const [recipientAddress, setRecipientAddress] = useState<string>(PEER_CONTACTS[0].solanaAddress);
-  const [recipientName, setRecipientName] = useState<string>('Rohan Kulkarni (rohan.sol)');
-  const [amountInr, setAmountInr] = useState<number>(1417);
-  const [memoNote, setMemoNote] = useState<string>('Dinner split');
-  const [txBroadcastBanner, setTxBroadcastBanner] = useState<string | null>(null);
+  const [amountInr, setAmountInr] = useState('');
+  const [memoNote, setMemoNote] = useState('');
+  const [notice, setNotice] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const ensured = useRef(false);
 
-  const selectedToken = useMemo(
-    () => CRYPTO_TOKENS.find((t) => t.symbol === selectedSymbol) || CRYPTO_TOKENS[0],
-    [selectedSymbol]
+  useEffect(() => {
+    setMyHandle(profile.cryptHandle);
+    setMyWallet(profile.solanaWallet);
+  }, [profile.cryptHandle, profile.solanaWallet]);
+
+  useEffect(() => {
+    if (ensured.current || !profile.email || profile.solanaWallet) return;
+    ensured.current = true;
+    void registerOrUpdateCryptUser({
+      name: profile.name || profile.email,
+      email: profile.email,
+      upiVpa: profile.upiVpa,
+      cryptHandle: profile.cryptHandle || profile.name || profile.email,
+      setAsActiveProfile: true,
+    });
+  }, [
+    profile.email,
+    profile.solanaWallet,
+    profile.name,
+    profile.upiVpa,
+    profile.cryptHandle,
+    registerOrUpdateCryptUser,
+  ]);
+
+  const tokens = useMemo(() => Object.values(CRYPTO_TOKENS), []);
+  const selectedToken = tokens.find((token) => token.symbol === selectedSymbol) || tokens[0];
+  const amount = Math.max(0, Number(amountInr) || 0);
+  const conversion = useMemo(
+    () => convertInrToCrypto(amount, selectedSymbol),
+    [amount, selectedSymbol]
   );
 
-  const handleSelectPeer = (peer: PeerContact) => {
-    setSelectedPeerId(peer.id);
-    setRecipientAddress(peer.solanaAddress);
-    setRecipientName(`${peer.name} (${peer.snsHandle})`);
-    setAmountInr(peer.defaultInr);
+  const contacts = state.cryptDirectory.filter(
+    (entry) =>
+      entry.email.toLowerCase() !== profile.email.toLowerCase() &&
+      entry.handle.toLowerCase() !== profile.cryptHandle.toLowerCase()
+  );
+
+  const payee = useMemo(() => {
+    const query = payTo.trim();
+    if (!query) return null;
+    const known = resolveCryptHandle(query, state.cryptDirectory);
+    if (known) {
+      return { name: known.name, handle: known.handle, address: known.walletAddress, saved: true };
+    }
+    if (isValidSolanaAddress(query)) {
+      return { name: shortAddress(query), handle: '', address: query.trim(), saved: false };
+    }
+    const handle = normalizeCryptHandle(query);
+    if (!handle) return null;
+    return {
+      name: handle,
+      handle,
+      address: generateDeterministicTestnetWallet(handle),
+      saved: false,
+    };
+  }, [payTo, state.cryptDirectory]);
+
+  const receiveUri = profile.solanaWallet
+    ? buildCryptoPaymentUri({
+        symbol: selectedSymbol,
+        recipientAddress: profile.solanaWallet,
+        recipientHandle: profile.cryptHandle,
+        tokenAmount: 0,
+        message: `Pay ${profile.cryptHandle || profile.name}`,
+      })
+    : '';
+
+  const sendUri = payee
+    ? buildCryptoPaymentUri({
+        symbol: selectedSymbol,
+        recipientAddress: payee.address,
+        recipientHandle: payee.handle,
+        directory: state.cryptDirectory,
+        tokenAmount: conversion.tokenAmount,
+        memo: memoNote,
+        message: memoNote || `Payment to ${payee.name}`,
+      })
+    : '';
+
+  const saveMyProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const handle = normalizeCryptHandle(myHandle || profile.name || profile.email);
+    if (!handle) {
+      setProfileError('Enter an id, such as your name.');
+      return;
+    }
+    const pasted = myWallet.trim();
+    if (pasted && !isValidSolanaAddress(pasted)) {
+      setProfileError('That wallet address is not a Solana address. Leave it blank to create one.');
+      return;
+    }
+    setProfileError(null);
+    await registerOrUpdateCryptUser({
+      name: profile.name || handle,
+      email: profile.email,
+      upiVpa: profile.upiVpa,
+      cryptHandle: handle,
+      solanaWallet: pasted,
+      setAsActiveProfile: true,
+    });
+    setNotice('Your receive address is saved.');
   };
 
-  const conversion = useMemo(
-    () => convertInrToCrypto(amountInr, selectedSymbol),
-    [amountInr, selectedSymbol]
-  );
+  const saveContact = async () => {
+    if (!payee || payee.handle.toLowerCase() === profile.cryptHandle.toLowerCase()) return;
+    await registerOrUpdateCryptUser({
+      name: payee.name,
+      email: '',
+      upiVpa: '',
+      cryptHandle: payee.handle || payee.name,
+      solanaWallet: payee.address,
+      setAsActiveProfile: false,
+    });
+    setNotice(`${payee.name} is saved as a contact.`);
+  };
 
-  const solanaUri = useMemo(
-    () =>
-      buildCryptoPaymentUri({
-        network: 'solana',
-        recipientAddress,
-        amountToken: conversion.tokenAmount,
-        symbol: selectedSymbol,
-        label: 'FinShield',
-        message: `${memoNote} (${formatINR(amountInr)})`,
-      }),
-    [recipientAddress, conversion.tokenAmount, selectedSymbol, memoNote, amountInr]
-  );
-
-  const handleRecordPayment = () => {
+  const recordPayment = () => {
+    if (!payee || amount <= 0) return;
     recordCryptoTransfer({
-      recipientName,
-      recipientAddress: `${recipientAddress.slice(0, 4)}...${recipientAddress.slice(-4)}`,
+      recipientName: payee.name,
+      recipientHandle: payee.handle || undefined,
+      recipientAddress: payee.address,
       symbol: selectedSymbol,
       tokenAmount: conversion.tokenAmount,
-      inrEquivalent: amountInr,
+      inrEquivalent: amount,
+      txHash: `local-${Date.now()}`,
+      timestamp: 'Just now',
+      status: 'CONFIRMED',
     });
-    setTxBroadcastBanner(
-      `Sent ${conversion.tokenAmount} ${selectedSymbol} (${formatINR(amountInr)}) to ${recipientName}.`
-    );
-    setTimeout(() => setTxBroadcastBanner(null), 5000);
+    setNotice(`Sent ${conversion.tokenAmount} ${selectedSymbol} to ${payee.name}.`);
+    setAmountInr('');
+    setMemoNote('');
   };
 
   return (
     <div className="pb-12">
-      <PageHeader title="Send crypto" />
+      <PageHeader title="Crypto" />
 
-      {txBroadcastBanner && (
-        <div
-          role="status"
-          className="mb-6 p-4 rounded-[22px] bg-[#32D74B]/15 text-[#1E8E3E] text-[14px] font-medium"
-        >
-          {txBroadcastBanner}
+      {notice && (
+        <div role="status" className="mb-6 p-4 rounded-[22px] bg-[#32D74B]/15 text-[#1E8E3E] text-[14px] font-medium">
+          {notice}
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div className="bento-pod p-5 sm:p-6 space-y-5 min-w-0">
+        <section className="bento-pod p-5 sm:p-6 space-y-5 min-w-0">
           <div>
-            <span className={labelCls}>Contacts</span>
-            <div className="flex flex-wrap gap-2">
-              {PEER_CONTACTS.map((peer) => {
-                const active = selectedPeerId === peer.id;
-                return (
-                  <button
-                    key={peer.id}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => handleSelectPeer(peer)}
-                    className={`h-10 px-4 rounded-full text-[13px] font-medium cursor-pointer ${
-                      active
-                        ? 'bg-[#1C1C1E] text-white'
-                        : 'bg-white text-[#1C1C1E] hover:bg-[#EBEBED]'
-                    }`}
-                  >
-                    {peer.name}
-                  </button>
-                );
-              })}
+            <h2 className="text-[17px] font-semibold">Your address</h2>
+            <p className="text-[13px] text-[#636366] mt-1">
+              This is where people pay you. Leave the wallet blank and one is created from your id.
+            </p>
+          </div>
+          <form onSubmit={saveMyProfile} className="space-y-4">
+            <div>
+              <label htmlFor="my-handle" className={labelCls}>Your id</label>
+              <input
+                id="my-handle"
+                type="text"
+                value={myHandle}
+                onChange={(e) => setMyHandle(e.target.value)}
+                placeholder="yourname#crypt"
+                className={inputCls}
+              />
             </div>
+            <div>
+              <label htmlFor="my-wallet" className={labelCls}>Your wallet</label>
+              <input
+                id="my-wallet"
+                type="text"
+                value={myWallet}
+                onChange={(e) => setMyWallet(e.target.value)}
+                placeholder="Leave blank to create one"
+                className={`${inputCls} font-mono text-[13px]`}
+              />
+            </div>
+            {profileError && <p className="text-[13px] text-[#D70015]">{profileError}</p>}
+            <button type="submit" className={primaryBtn}>Save address</button>
+          </form>
+          {receiveUri && (
+            <div className="bg-white p-5 rounded-[22px] flex flex-col items-center text-center">
+              <DynamicQrSvg value={receiveUri} size={180} badgeLabel={selectedSymbol} />
+              <p className="mt-3 text-[14px] font-medium">{profile.cryptHandle}</p>
+              <p className="text-[12px] text-[#636366] font-mono break-all">{profile.solanaWallet}</p>
+            </div>
+          )}
+        </section>
+
+        <section className="bento-pod p-5 sm:p-6 space-y-5 min-w-0">
+          <div>
+            <h2 className="text-[17px] font-semibold">Send</h2>
+            <p className="text-[13px] text-[#636366] mt-1">
+              Pay a saved contact, an id, or a wallet address.
+            </p>
+          </div>
+
+          {contacts.length > 0 && (
+            <div>
+              <span className={labelCls}>Contacts</span>
+              <div className="flex flex-wrap gap-2">
+                {contacts.map((contact) => {
+                  const active = payee?.handle === contact.handle;
+                  return (
+                    <button
+                      key={contact.id}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setPayTo(contact.handle)}
+                      className={`h-10 px-4 rounded-full text-[13px] font-medium cursor-pointer ${
+                        active ? 'bg-[#1C1C1E] text-white' : 'bg-white text-[#1C1C1E] hover:bg-[#EBEBED]'
+                      }`}
+                    >
+                      {contact.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="pay-to" className={labelCls}>Pay to</label>
+            <input
+              id="pay-to"
+              type="text"
+              value={payTo}
+              onChange={(e) => setPayTo(e.target.value)}
+              placeholder="name#crypt or a wallet address"
+              className={inputCls}
+            />
+            {payee && (
+              <p className="text-[12px] text-[#636366] mt-2 font-mono break-all">
+                {payee.name} · {payee.address}
+              </p>
+            )}
           </div>
 
           <div>
             <span className={labelCls}>Token</span>
             <div className="inline-flex bg-white p-1 rounded-full">
-              {CRYPTO_TOKENS.map((tok) => {
-                const active = selectedSymbol === tok.symbol;
+              {tokens.map((token) => {
+                const active = selectedSymbol === token.symbol;
                 return (
                   <button
-                    key={tok.symbol}
+                    key={token.symbol}
                     type="button"
                     aria-pressed={active}
-                    onClick={() => setSelectedSymbol(tok.symbol)}
+                    onClick={() => setSelectedSymbol(token.symbol)}
                     className={`h-9 px-4 rounded-full text-[13px] font-medium cursor-pointer ${
                       active ? 'bg-[#1C1C1E] text-white' : 'text-[#636366]'
                     }`}
                   >
-                    {tok.symbol}
+                    {token.symbol}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div>
-            <label htmlFor="crypto-recipient" className={labelCls}>
-              Recipient name
-            </label>
-            <input
-              id="crypto-recipient"
-              type="text"
-              value={recipientName}
-              onChange={(e) => setRecipientName(e.target.value)}
-              className={inputCls}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="crypto-address" className={labelCls}>
-              Wallet address
-            </label>
-            <input
-              id="crypto-address"
-              type="text"
-              value={recipientAddress}
-              onChange={(e) => setRecipientAddress(e.target.value)}
-              className={`${inputCls} font-mono text-[13px]`}
-            />
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="crypto-inr" className={labelCls}>
-                Amount (INR)
-              </label>
+              <label htmlFor="crypto-inr" className={labelCls}>Amount (INR)</label>
               <input
                 id="crypto-inr"
                 type="number"
-                min={10}
+                min={1}
                 value={amountInr}
-                onChange={(e) => setAmountInr(Math.max(1, Number(e.target.value)))}
+                onChange={(e) => setAmountInr(e.target.value)}
+                placeholder="0"
                 className={`${inputCls} tabular-nums font-semibold`}
               />
             </div>
@@ -214,7 +317,7 @@ export default function CryptoPage() {
               <span className={labelCls}>Amount ({selectedSymbol})</span>
               <div className="h-11 px-4 rounded-[16px] bg-white flex items-center justify-between">
                 <span className="text-[14px] font-semibold tabular-nums">
-                  {conversion.tokenAmount} {selectedSymbol}
+                  {amount > 0 ? `${conversion.tokenAmount} ${selectedSymbol}` : '—'}
                 </span>
                 <span className="text-[12px] text-[#636366] tabular-nums">
                   1 {selectedSymbol} = {formatINR(selectedToken.inrRate)}
@@ -224,67 +327,64 @@ export default function CryptoPage() {
           </div>
 
           <div>
-            <label htmlFor="crypto-memo" className={labelCls}>
-              Note
-            </label>
+            <label htmlFor="crypto-memo" className={labelCls}>Note</label>
             <input
               id="crypto-memo"
               type="text"
               value={memoNote}
               onChange={(e) => setMemoNote(e.target.value)}
+              placeholder="What this payment is for"
               className={inputCls}
             />
           </div>
 
-          <button type="button" onClick={handleRecordPayment} className={`${primaryBtn} w-full`}>
-            Record transfer
-          </button>
-        </div>
-
-        <div className="bento-pod p-5 sm:p-6 flex flex-col items-center text-center space-y-4 min-w-0">
-          <div className="bg-white p-6 rounded-[22px] flex flex-col items-center">
-            <DynamicQrSvg value={solanaUri} size={200} centerBadge={selectedSymbol} />
-            <div className="mt-4 space-y-0.5">
-              <div className="text-[22px] font-semibold tabular-nums">
-                {conversion.tokenAmount} {selectedSymbol}
-              </div>
-              <div className="text-[13px] text-[#636366] tabular-nums">
-                {formatINR(amountInr)} · {recipientName}
-              </div>
-            </div>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={recordPayment} disabled={!payee || amount <= 0} className={primaryBtn}>
+              Record transfer
+            </button>
+            {payee && !payee.saved && (
+              <button type="button" onClick={saveContact} className={secondaryBtn}>
+                Save contact
+              </button>
+            )}
           </div>
 
-          <details className="w-full text-left">
-            <summary className="text-[13px] text-[#636366] cursor-pointer py-2">
-              Show payment link
-            </summary>
-            <div className="mt-2 p-3 rounded-[16px] bg-white flex items-center justify-between gap-2">
-              <code className="text-[12px] font-mono text-[#1C1C1E] truncate">{solanaUri}</code>
+          {sendUri && (
+            <div className="bg-white p-5 rounded-[22px] flex flex-col items-center text-center">
+              <DynamicQrSvg value={sendUri} size={180} badgeLabel={selectedSymbol} />
+              <p className="mt-3 text-[14px] font-medium tabular-nums">
+                {amount > 0 ? `${conversion.tokenAmount} ${selectedSymbol}` : 'Payment link'}
+              </p>
               <button
                 type="button"
-                onClick={() => navigator.clipboard?.writeText(solanaUri)}
-                className={`${secondaryBtn} h-8 px-3 text-[12px] shrink-0`}
+                onClick={() => navigator.clipboard?.writeText(sendUri)}
+                className={`${secondaryBtn} mt-3 h-8 px-3 text-[12px]`}
               >
-                Copy
+                Copy payment link
               </button>
             </div>
-          </details>
-        </div>
+          )}
+        </section>
       </div>
 
       {state.cryptoTransfers.length > 0 && (
         <section className="mt-8 space-y-3" aria-labelledby="recent-transfers-h">
-          <h2 id="recent-transfers-h" className="text-[17px] font-semibold">
-            Recent transfers
-          </h2>
-          <InsetGroupedList
-            items={state.cryptoTransfers.map((tx) => ({
-              id: tx.id,
-              title: tx.recipientName,
-              subtitle: tx.timestamp,
-              amountText: `${tx.tokenAmount} ${tx.symbol} (${formatINR(tx.inrEquivalent)})`,
-            }))}
-          />
+          <h2 id="recent-transfers-h" className="text-[17px] font-semibold">Recent transfers</h2>
+          <InsetGroupedList>
+            {state.cryptoTransfers.map((tx) => (
+              <div key={tx.id} className="px-5 py-3.5 flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[15px] font-medium truncate">{tx.recipientName}</p>
+                  <p className="text-[13px] text-[#636366] truncate">
+                    {tx.recipientHandle || shortAddress(tx.recipientAddress)} · {tx.timestamp}
+                  </p>
+                </div>
+                <p className="text-[15px] font-medium tabular-nums shrink-0">
+                  {tx.tokenAmount} {tx.symbol}
+                </p>
+              </div>
+            ))}
+          </InsetGroupedList>
         </section>
       )}
     </div>

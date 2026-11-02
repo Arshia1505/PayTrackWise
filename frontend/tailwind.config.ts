@@ -10,6 +10,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        ink: "#1c1b3a",
+        "ink-soft": "#2d2f55",
+        muted: "#6b7194",
+        mist: "#a3a8c3",
+        cloud: "#f4f5fd",
+        haze: "#eceefb",
+        peri: "#dde6fb",
+        "sky-soft": "#bcd0f7",
+        lilac: "#cbbef5",
+        orchid: "#f3b8e6",
+        peach: "#f8dcd2",
+        azure: "#3d86ff",
+        iris: "#8f7df0",
+        glow: "#e35fc9",
         "secondary-fixed-dim": "#c7c6c9",
         "outline-variant": "#c7c6ca",
         "on-primary-container": "#858486",
@@ -89,7 +103,9 @@ const config: Config = {
         "space-xl": "1.5rem",
       },
       fontFamily: {
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        sans: ["var(--font-inter)", "Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        display: ["var(--font-inter-tight)", "Inter", "sans-serif"],
+        michroma: ["var(--font-michroma-face)", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
         "label-caps": ["Inter", "sans-serif"],
         "body-md": ["Inter", "sans-serif"],

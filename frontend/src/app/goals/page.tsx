@@ -21,13 +21,21 @@ function Bar({ pct }: { pct: number }) {
 }
 
 export default function GoalsPage() {
-  const { state, contributeToGoal, addGoal, payDebtEmi } = useFinShield();
+  const { state, contributeToGoal, addGoal, addDebt, payDebtEmi } = useFinShield();
   const [activeTab, setActiveTab] = useState<'goals' | 'debts'>('goals');
 
   const [contributeGoalId, setContributeGoalId] = useState<string | null>(null);
   const [contributeAmount, setContributeAmount] = useState<string>('');
 
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
+  const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
+  const [debtName, setDebtName] = useState('');
+  const [debtLender, setDebtLender] = useState('');
+  const [debtTotal, setDebtTotal] = useState('');
+  const [debtEmi, setDebtEmi] = useState('');
+  const [debtApr, setDebtApr] = useState('');
+  const [debtMonths, setDebtMonths] = useState('');
+  const [debtDue, setDebtDue] = useState('');
   const [newGoalName, setNewGoalName] = useState('');
   const [newGoalTarget, setNewGoalTarget] = useState('');
   const [newGoalSip, setNewGoalSip] = useState('');
@@ -70,6 +78,30 @@ export default function GoalsPage() {
     setIsAddGoalOpen(false);
   };
 
+  const handleCreateDebt = (e: React.FormEvent) => {
+    e.preventDefault();
+    const total = Math.max(1, Number(debtTotal) || 0);
+    const emi = Math.max(1, Number(debtEmi) || 0);
+    addDebt({
+      name: debtName.trim() || 'Loan',
+      lender: debtLender.trim() || 'Lender',
+      totalLoan: total,
+      paidPrincipal: 0,
+      emi,
+      apr: Math.max(0, Number(debtApr) || 0),
+      remainingMonths: Math.max(1, Math.round(Number(debtMonths) || Math.ceil(total / emi))),
+      nextDueDate: debtDue.trim() || 'Next month',
+    });
+    setDebtName('');
+    setDebtLender('');
+    setDebtTotal('');
+    setDebtEmi('');
+    setDebtApr('');
+    setDebtMonths('');
+    setDebtDue('');
+    setIsAddDebtOpen(false);
+  };
+
   const contributingGoal = state.goals.find((g) => g.id === contributeGoalId);
 
   return (
@@ -81,7 +113,11 @@ export default function GoalsPage() {
             <button type="button" onClick={() => setIsAddGoalOpen(true)} className={PRIMARY}>
               New goal
             </button>
-          ) : undefined
+          ) : (
+            <button type="button" onClick={() => setIsAddDebtOpen(true)} className={PRIMARY}>
+              Add debt
+            </button>
+          )
         }
       />
 
@@ -183,8 +219,15 @@ export default function GoalsPage() {
             </section>
 
             {state.debts.length === 0 ? (
-              <div className="bento-pod p-10 text-center text-[15px] text-[#636366]">
-                No debts tracked.
+              <div className="bento-pod p-10 text-center">
+                <p className="text-[15px] text-[#636366]">No debts tracked.</p>
+                <button
+                  type="button"
+                  onClick={() => setIsAddDebtOpen(true)}
+                  className={`${PRIMARY} mt-4`}
+                >
+                  Add a debt
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -246,6 +289,124 @@ export default function GoalsPage() {
           </div>
           <button type="submit" className={`${PRIMARY} w-full`}>
             Add money
+          </button>
+        </form>
+      </UniversalSheetModal>
+
+      <UniversalSheetModal
+        isOpen={isAddDebtOpen}
+        onClose={() => setIsAddDebtOpen(false)}
+        title="Add a debt"
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={handleCreateDebt} className="space-y-4">
+          <div>
+            <label htmlFor="debt-name" className="text-[13px] text-[#636366] block mb-1.5">
+              What is it
+            </label>
+            <input
+              id="debt-name"
+              type="text"
+              value={debtName}
+              onChange={(e) => setDebtName(e.target.value)}
+              placeholder="Home loan"
+              className={FIELD}
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="debt-lender" className="text-[13px] text-[#636366] block mb-1.5">
+              Lender
+            </label>
+            <input
+              id="debt-lender"
+              type="text"
+              value={debtLender}
+              onChange={(e) => setDebtLender(e.target.value)}
+              placeholder="HDFC Bank"
+              className={FIELD}
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="debt-total" className="text-[13px] text-[#636366] block mb-1.5">
+                Amount left (₹)
+              </label>
+              <input
+                id="debt-total"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                value={debtTotal}
+                onChange={(e) => setDebtTotal(e.target.value)}
+                placeholder="1200000"
+                className={FIELD}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="debt-emi" className="text-[13px] text-[#636366] block mb-1.5">
+                Monthly EMI (₹)
+              </label>
+              <input
+                id="debt-emi"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                value={debtEmi}
+                onChange={(e) => setDebtEmi(e.target.value)}
+                placeholder="18500"
+                className={FIELD}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="debt-apr" className="text-[13px] text-[#636366] block mb-1.5">
+                Interest (% a year)
+              </label>
+              <input
+                id="debt-apr"
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="0.1"
+                value={debtApr}
+                onChange={(e) => setDebtApr(e.target.value)}
+                placeholder="8.5"
+                className={FIELD}
+              />
+            </div>
+            <div>
+              <label htmlFor="debt-months" className="text-[13px] text-[#636366] block mb-1.5">
+                Months left
+              </label>
+              <input
+                id="debt-months"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                value={debtMonths}
+                onChange={(e) => setDebtMonths(e.target.value)}
+                placeholder="84"
+                className={FIELD}
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="debt-due" className="text-[13px] text-[#636366] block mb-1.5">
+              Next due date
+            </label>
+            <input
+              id="debt-due"
+              type="text"
+              value={debtDue}
+              onChange={(e) => setDebtDue(e.target.value)}
+              placeholder="5 Dec 2026"
+              className={FIELD}
+            />
+          </div>
+          <button type="submit" className={`${PRIMARY} w-full`}>
+            Save debt
           </button>
         </form>
       </UniversalSheetModal>

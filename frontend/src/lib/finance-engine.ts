@@ -511,48 +511,6 @@ export interface CsvAnalysisReport {
   aiExecutiveSummary: string[];
 }
 
-export const SAMPLE_BANK_CSV = `Date,Narration,Chq./Ref.No.,Value Dt,Withdrawal Amt.,Deposit Amt.,Closing Balance
-01/11/2026,NEFT CR-TECHCORP INDIA PVT LTD-SALARY NOV,HDFC0091821,01/11/2026,0.00,145000.00,289500.00
-02/11/2026,UPI-PRESTIGE SHANTINIKETAN RENT-LANDLORD,430611209811,02/11/2026,22000.00,0.00,267500.00
-03/11/2026,ACH D-HDFC HOME LOAN EMI-00482199,HDFCEM99120,03/11/2026,18500.00,0.00,249000.00
-04/11/2026,UPI-BESCOM ELECTRICITY BOARD-BLR44910,430819283712,04/11/2026,3258.00,0.00,245742.00
-05/11/2026,UPI-RELIANCE FRESH SUPERMARKET-GROCERY,430911223344,05/11/2026,3450.00,0.00,242292.00
-05/11/2026,POS-NETFLIX COM MUMBAI RECURRING,430999887766,05/11/2026,649.00,0.00,241643.00
-06/11/2026,UPI-SWIGGY INSTAMART BLR,431011229988,06/11/2026,620.00,0.00,241023.00
-07/11/2026,UPI-AIRTEL XSTREAM FIBER BROADBAND,431122334455,07/11/2026,1179.00,0.00,239844.00
-08/11/2026,POS-OPENAI CHATGPT PLUS SUBSCRIPTION,431233445566,08/11/2026,1950.00,0.00,237894.00
-09/11/2026,UPI-BLUE TOKAI COFFEE ROASTERS,431344556677,09/11/2026,480.00,0.00,237414.00
-10/11/2026,UPI-SHELL FUEL STATION BENGALURU,431455667788,10/11/2026,2850.00,0.00,234564.00
-11/11/2026,UPI-ZOMATO LIMITED DINING,431566778899,11/11/2026,740.00,0.00,233824.00
-12/11/2026,UPI-BIGBASKET DAILY GROCERY,431677889900,12/11/2026,1290.00,0.00,232534.00
-13/11/2026,POS-SPOTIFY INDIA DUO PLAN,431788990011,13/11/2026,179.00,0.00,232355.00
-14/11/2026,UPI-THIRD WAVE COFFEE ROASTERS,431899001122,14/11/2026,520.00,0.00,231835.00
-15/11/2026,POS-CROMA ELECTRONICS INDIRANAGAR,431900112233,15/11/2026,28990.00,0.00,202845.00`;
-
-export const SAMPLE_ICICI_CSV = `Transaction Date,Transaction Remarks,Withdrawal Amount (INR),Deposit Amount (INR),Balance (INR)
-01/11/2026,NEFT-DESIGN RETAINER INFLOW,0,65000,192000
-03/11/2026,UPI/BESCOM ELECTRICITY BILL/BLR,2980,0,189020
-05/11/2026,CARD/APPLE ONE CLOUD SUBSCRIPTION,365,0,188655
-07/11/2026,UPI/NATURE BASKET GROCERY,1840,0,186815
-09/11/2026,UPI/CHURCH STREET SOCIAL DINNER,4250,0,182565
-11/11/2026,UPI/GAIL PIPED NATURAL GAS BILL,845,0,181720
-14/11/2026,POS/LUXURY WATCH BOUTIQUE UB CITY,34500,0,147220`;
-
-export const SAMPLE_SBI_CSV = `Txn Date,Value Date,Description,Ref No./Cheque No.,Debit,Credit,Balance
-01/11/2026,01/11/2026,BY TRANSFER-NEFT SALARY CREDIT,SBI0091821,0.00,"1,35,000.00","2,45,000.00"
-03/11/2026,03/11/2026,"TO TRANSFER-UPI/DR/BESCOM, BLR",430819283712,"3,120.00",0.00,"2,41,880.00"
-05/11/2026,05/11/2026,ACH D-SBI EV CAR LOAN EMI,SBIEM4412,"9,600.00",0.00,"2,32,280.00"
-08/11/2026,08/11/2026,"POS-YOUTUBE PREMIUM, MUMBAI",431233445566,149.00,0.00,"2,32,131.00"
-10/11/2026,10/11/2026,"UPI-SWIGGY, KORAMANGALA, BLR",431455667788,680.00,0.00,"2,31,451.00"
-14/11/2026,14/11/2026,POS-APPLE STORE BENGALURU,431900112233,"42,900.00",0.00,"1,88,551.00"`;
-
-export const SAMPLE_AXIS_CSV = `Tran Date,Particulars,Chq/Ref No,Amount,Dr/Cr,Balance
-01/11/2026,NEFT/INFLOW/TECH RETAINER,AX00912,"95,000.00",CR,"2,10,000.00"
-04/11/2026,"UPI/AIRTEL FIBER, BENGALURU",AX11234,"1,179.00",DR,"2,08,821.00"
-06/11/2026,"POS/NETFLIX.COM, MUMBAI",AX22345,649.00,DR,"2,08,172.00"
-09/11/2026,"UPI/BIGBASKET, GROCERY",AX33456,"2,340.00",DR,"2,05,832.00"
-12/11/2026,POS/TANISHQ JEWELLERS BLR,AX44567,"38,500.00",DR,"1,67,332.00"`;
-
 // RFC-4180 Quote-Aware CSV Line Splitter (handles commas inside quotes and "" escapes)
 export function splitCsvLine(line: string): string[] {
   const result: string[] = [];
@@ -963,101 +921,13 @@ export function generateDeterministicTestnetWallet(seedInput: string): string {
   return chars.join('');
 }
 
-export const DEFAULT_CRYPT_DIRECTORY: CryptHandleProfile[] = [
-  {
-    id: 'crypt-u0',
-    handle: 'arjun#crypt',
-    username: 'arjun',
-    name: 'Arjun Mehta',
-    email: 'arjun.mehta@finshield.in',
-    upiVpa: 'arjun@okicici',
-    phone: '919845000111',
-    walletAddress: '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R',
-    snsDomain: 'arjun.sol',
-    avatarInitials: 'AM',
-    network: 'testnet',
-    verified: true,
-    createdAt: '2026-10-15T09:00:00.000Z',
-    recentSplitNote: 'Primary Enclave Owner',
-    suggestedInr: 1000,
-  },
-  {
-    id: 'crypt-u1',
-    handle: 'rohan#crypt',
-    username: 'rohan',
-    name: 'Rohan Kulkarni',
-    email: 'rohan.k@finshield.in',
-    upiVpa: 'rohan.k@okaxis',
-    phone: '919845011223',
-    walletAddress: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
-    snsDomain: 'rohan.sol',
-    avatarInitials: 'RK',
-    network: 'testnet',
-    verified: true,
-    createdAt: '2026-10-18T14:30:00.000Z',
-    recentSplitNote: 'Church Street Social Dinner Split',
-    suggestedInr: 1417,
-  },
-  {
-    id: 'crypt-u2',
-    handle: 'priya#crypt',
-    username: 'priya',
-    name: 'Priya Nair',
-    email: 'priya.nair@finshield.in',
-    upiVpa: 'priya.nair@okhdfcbank',
-    phone: '919880144556',
-    walletAddress: '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin',
-    snsDomain: 'priya.sol',
-    avatarInitials: 'PN',
-    network: 'testnet',
-    verified: true,
-    createdAt: '2026-10-20T11:15:00.000Z',
-    recentSplitNote: 'BESCOM & Airtel Flatmate Share',
-    suggestedInr: 1630,
-  },
-  {
-    id: 'crypt-u3',
-    handle: 'vikram#crypt',
-    username: 'vikram',
-    name: 'Vikram Singh',
-    email: 'vikram.s@finshield.in',
-    upiVpa: 'vikram.s@ybl',
-    phone: '919740088991',
-    walletAddress: '3yMK9YpL7vR4m8Q2k9W1n8X5p3C7d2E9f1G4h6J8k2L4',
-    snsDomain: 'vikram.sol',
-    avatarInitials: 'VS',
-    network: 'testnet',
-    verified: true,
-    createdAt: '2026-10-22T17:45:00.000Z',
-    recentSplitNote: 'Weekend Turf & Coffee Split',
-    suggestedInr: 850,
-  },
-  {
-    id: 'crypt-u4',
-    handle: 'ananya#crypt',
-    username: 'ananya',
-    name: 'Ananya Iyer',
-    email: 'ananya.iyer@finshield.in',
-    upiVpa: 'ananya.iyer@okicici',
-    phone: '919900112233',
-    walletAddress: '6pZa8LkM2nQ9vB4x7T1w5R3y8C6d4F2h9J7k3M5n8P2q',
-    snsDomain: 'ananya.sol',
-    avatarInitials: 'AI',
-    network: 'testnet',
-    verified: true,
-    createdAt: '2026-10-25T10:20:00.000Z',
-    recentSplitNote: 'Blue Tokai & Book Club Split',
-    suggestedInr: 1120,
-  },
-];
-
 /**
  * Resolves a single user profile from the `#crypt` directory by exact handle (`username#crypt`),
  * bare username, `.sol` domain, UPI VPA, email, or Solana Testnet wallet address.
  */
 export function resolveCryptHandle(
   query: string,
-  directory: CryptHandleProfile[] = DEFAULT_CRYPT_DIRECTORY
+  directory: CryptHandleProfile[] = []
 ): CryptHandleProfile | null {
   if (!query || typeof query !== 'string') return null;
   const raw = query.trim();
@@ -1087,7 +957,7 @@ export function resolveCryptHandle(
  */
 export function searchCryptDirectory(
   query: string,
-  directory: CryptHandleProfile[] = DEFAULT_CRYPT_DIRECTORY
+  directory: CryptHandleProfile[] = []
 ): CryptHandleProfile[] {
   if (!query || !query.trim()) return directory;
   const q = query.trim().toLowerCase();
@@ -1175,14 +1045,12 @@ export function buildCryptoPaymentUri(opts: {
       ? resolveCryptHandle(rawRecipient, opts.directory)
       : null;
 
+  const handleSeed = (opts.recipientHandle || rawRecipient).trim();
   const recipient =
     resolvedFromHandle?.walletAddress ||
-    (rawRecipient && !rawRecipient.includes('#crypt')
-      ? rawRecipient
-      : resolvedFromHandle?.walletAddress ||
-        (rawRecipient.includes('#crypt')
-          ? generateDeterministicTestnetWallet(rawRecipient)
-          : '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU'));
+    (isValidSolanaAddress(rawRecipient) ? rawRecipient.trim() : '') ||
+    (handleSeed.includes('#crypt') ? generateDeterministicTestnetWallet(handleSeed) : '');
+  if (!recipient) return '';
 
   const token = CRYPTO_TOKENS[opts.symbol] || CRYPTO_TOKENS.USDC;
   const params = new URLSearchParams();

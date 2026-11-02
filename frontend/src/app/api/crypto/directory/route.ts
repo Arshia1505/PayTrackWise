@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import {
-  DEFAULT_CRYPT_DIRECTORY,
   SOLANA_NETWORKS,
   generateDeterministicTestnetWallet,
   isValidCryptHandle,
@@ -11,7 +10,6 @@ import {
   type CryptHandleProfile,
   type SolanaCluster,
 } from '@/lib/finance-engine';
-import { syncEntityToDynamoDB, type AwsCloudConfig } from '@/lib/aws-cloud';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -20,7 +18,7 @@ declare global {
 
 function getSharedDirectory(): CryptHandleProfile[] {
   if (!globalThis.__finshieldCryptDirectory) {
-    globalThis.__finshieldCryptDirectory = [...DEFAULT_CRYPT_DIRECTORY];
+    globalThis.__finshieldCryptDirectory = [];
   }
   return globalThis.__finshieldCryptDirectory;
 }
@@ -50,11 +48,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const rawName = String(body?.name || 'FinShield User').trim() || 'FinShield User';
-    const rawEmail =
-      String(body?.email || `${rawName.toLowerCase().replace(/\s+/g, '.')}@finshield.in`).trim();
-    const rawUpi =
-      String(body?.upiVpa || `${rawName.split(' ')[0].toLowerCase()}@okicici`).trim();
+    const rawName = String(body?.name || '').trim() || 'Contact';
+    const rawEmail = String(body?.email || '').trim();
+    const rawUpi = String(body?.upiVpa || '').trim();
     const rawPhone = body?.phone ? String(body.phone).trim() : undefined;
     const rawCluster: SolanaCluster = body?.network === 'devnet' ? 'devnet' : 'testnet';
 
@@ -117,7 +113,7 @@ export async function POST(request: Request) {
       name: rawName,
       email: rawEmail,
       upiVpa: rawUpi,
-      phone: rawPhone || (existingIdx >= 0 ? directory[existingIdx].phone : '919845099887'),
+      phone: rawPhone || (existingIdx >= 0 ? directory[existingIdx].phone : ''),
       walletAddress,
       snsDomain: `${usernamePart}.sol`,
       avatarInitials: initials,
@@ -131,11 +127,11 @@ export async function POST(request: Request) {
           ? directory[existingIdx].recentSplitNote
           : 'Registered on Solana Testnet (#crypt)'),
       suggestedInr:
-        typeof body?.suggestedInr === 'number' && body.suggestedInr > 0
+        typeof body?.suggestedInr === 'number'
           ? body.suggestedInr
           : existingIdx >= 0
-          ? directory[existingIdx].suggestedInr || 500
-          : 500,
+          ? directory[existingIdx].suggestedInr || 0
+          : 0,
     };
 
     if (existingIdx >= 0) {
@@ -144,19 +140,10 @@ export async function POST(request: Request) {
       directory.push(profileEntry);
     }
 
-    const awsConfig: Partial<AwsCloudConfig> | undefined = body?.awsConfig;
-    const syncResult = await syncEntityToDynamoDB(
-      'CRYPT_HANDLE_DIRECTORY',
-      normalizedHandle,
-      profileEntry as unknown as Record<string, unknown>,
-      awsConfig
-    );
-
     return NextResponse.json({
       ok: true,
       profile: profileEntry,
       directory,
-      syncResult,
     });
   } catch (err) {
     return NextResponse.json(

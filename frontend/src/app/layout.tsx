@@ -1,7 +1,23 @@
 import type { Metadata } from 'next';
+import { Inter, Inter_Tight, Instrument_Serif, Michroma } from 'next/font/google';
 import './globals.css';
+import './marketing.css';
 import { FinShieldProvider } from '@/context/FinShieldContext';
 import { AppShell } from '@/components/AppShell';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const interTight = Inter_Tight({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-inter-tight',
+});
+const michroma = Michroma({ subsets: ['latin'], weight: '400', variable: '--font-michroma-face' });
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-instrument-serif',
+});
 
 export const metadata: Metadata = {
   title: 'FinShield — Personal Finance',
@@ -15,7 +31,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={`${inter.variable} ${interTight.variable} ${michroma.variable} ${instrumentSerif.variable}`}
+    >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

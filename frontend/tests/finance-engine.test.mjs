@@ -11,7 +11,6 @@ const projectRoot = '/home/akinchan/Documents/Projects/FinProj';
 test('FinShield Project Structure & All 15+ Route Files Exist', () => {
   const requiredFiles = [
     'src/lib/finance-engine.ts',
-    'src/lib/aws-cloud.ts',
     'src/components/primitives/index.tsx',
     'src/context/FinShieldContext.tsx',
     'src/components/AppShell.tsx',
@@ -31,9 +30,6 @@ test('FinShield Project Structure & All 15+ Route Files Exist', () => {
     'src/app/notifications/page.tsx',
     'src/app/login/page.tsx',
     'src/app/settings/page.tsx',
-    'src/app/api/ai/analyze-csv/route.ts',
-    'src/app/api/ocr/scan/route.ts',
-    'src/app/api/aws/sync/route.ts',
   ];
 
   for (const relPath of requiredFiles) {
@@ -186,58 +182,3 @@ test('Node v24 TypeScript Native Stripping - finance-engine.ts Edge Cases', asyn
   assert.equal(usdcUri.includes('memo=Dinner+Split'), true);
 });
 
-test('AWS SigV4 Signing (with STS SessionToken) & Hybrid Fallback Verification - aws-cloud.ts', async () => {
-  const aws = await import('../src/lib/aws-cloud.ts');
-
-  const signed = aws.signAwsV4Request({
-    method: 'POST',
-    service: 'dynamodb',
-    region: 'ap-south-1',
-    host: 'dynamodb.ap-south-1.amazonaws.com',
-    path: '/',
-    headers: {
-      'content-type': 'application/x-amz-json-1.0',
-      'x-amz-target': 'DynamoDB_20120810.PutItem',
-    },
-    body: JSON.stringify({ TableName: 'FinShieldLedger' }),
-    accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-    secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-    sessionToken: 'IQoJb3JpZ2luX2VjEJr//////////wEaCmFwLXNvdXRoLTE=',
-  });
-
-  assert.match(
-    signed.Authorization,
-    /^AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE\/\d{8}\/ap-south-1\/dynamodb\/aws4_request/
-  );
-  assert.equal(signed.Authorization.includes('x-amz-security-token'), true);
-  assert.equal(
-    signed['x-amz-security-token'],
-    'IQoJb3JpZ2luX2VjEJr//////////wEaCmFwLXNvdXRoLTE='
-  );
-  assert.equal(typeof signed['x-amz-date'], 'string');
-  assert.equal(signed['x-amz-content-sha256'].length, 64);
-
-  // Hybrid fallback when no live AWS keys are present
-  const s3Fallback = await aws.archiveArtifactToS3(
-    'test/statement.csv',
-    'Date,Amount\n2026-11-01,500',
-    'text/csv'
-  );
-  assert.equal(s3Fallback.mode, 'HYBRID_LOCAL');
-  assert.equal(s3Fallback.archived, true);
-  assert.equal(s3Fallback.sha256.length, 64);
-
-  const ocrBescom = await aws.analyzeReceiptWithTextract('bescom-electricity-bill.jpg');
-  assert.equal(ocrBescom.merchant, 'BESCOM Electricity Board');
-  assert.equal(ocrBescom.category, 'Utilities & Rent');
-  assert.equal(ocrBescom.lineItems.length, 3);
-
-  const dynamoSync = await aws.syncEntityToDynamoDB('VAULT_SNAPSHOT', 'arjun@finshield.in', {
-    balance: 184500,
-  });
-  assert.equal(dynamoSync.synced, true);
-  assert.equal(dynamoSync.mode, 'HYBRID_LOCAL');
-
-  const bedrockRes = await aws.invokeBedrockModel('Audit statement');
-  assert.equal(bedrockRes.mode, 'HYBRID_LOCAL');
-});

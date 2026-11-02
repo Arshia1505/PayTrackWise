@@ -23,13 +23,13 @@
   - [x] Scene 9: ML Shield Anomaly Guard ([`src/app/ml-shield/page.tsx`](./src/app/ml-shield/page.tsx))
   - [x] Scene 10: Notifications Center ([`src/app/notifications/page.tsx`](./src/app/notifications/page.tsx))
   - [x] Scene 11: Login & Registration ([`src/app/login/page.tsx`](./src/app/login/page.tsx))
-  - [x] Scene 12: Profile & Settings + AWS Cloud Configurator ([`src/app/settings/page.tsx`](./src/app/settings/page.tsx))
+  - [x] Scene 12: Profile & Settings ([`src/app/settings/page.tsx`](./src/app/settings/page.tsx))
   - [x] Scene 13: Client-Side Dynamic UPI QR, WhatsApp Split & Pending Collections ([`src/app/split/page.tsx`](./src/app/split/page.tsx))
 
 ### 2. Expansion Modules & Backend Engines
 - [x] **Subscriptions & Utility Bills Hub** ([`src/app/subscriptions/page.tsx`](./src/app/subscriptions/page.tsx)) — Separated fixed Digital Subscriptions (Netflix, Spotify, Prime, etc.) from variable Metered Utility Bills (BESCOM Electricity, Airtel Fiber, Gas, Water, Rent).
-- [x] **CSV Bank Statement Import & AI Analysis** ([`src/app/import-csv/page.tsx`](./src/app/import-csv/page.tsx), [`src/app/api/ai/analyze-csv/route.ts`](./src/app/api/ai/analyze-csv/route.ts)) — Quote-aware RFC-4180 parser for HDFC, ICICI, SBI, Axis, and Kotak CSVs + S3 archival + Bedrock AI categorization & anomaly detection.
-- [x] **AWS Cloud Stack + Hybrid Local Fallback** ([`src/lib/aws-cloud.ts`](./src/lib/aws-cloud.ts), [`AWS_SETUP_GUIDE.md`](./AWS_SETUP_GUIDE.md)) — Native AWS SigV4 client for Bedrock, Textract (`AnalyzeExpense`), S3, and DynamoDB (`PutItem`).
+- [x] **CSV Bank Statement Import & AI Analysis** ([`src/app/import-csv/page.tsx`](./src/app/import-csv/page.tsx)) — Quote-aware parser for Indian bank CSVs. Summaries are written by local Ollama and cached in SQLite.
+- [x] **Local Python backend** (`../backend`) — FastAPI, SQLite, and Ollama. No cloud document or model provider.
 - [x] **Solana Testnet (`api.testnet.solana.com`) & `username#crypt` Directory** ([`src/app/crypto/page.tsx`](./src/app/crypto/page.tsx), [`src/app/api/crypto/directory/route.ts`](./src/app/api/crypto/directory/route.ts), [`src/lib/finance-engine.ts`](./src/lib/finance-engine.ts)) — Multi-user `username#crypt` directory API, handle resolution (`arjun#crypt`, `rohan#crypt`, `priya#crypt`), Testnet/Devnet RPC `getBalance` & `requestAirdrop`, and Solana Pay QR codes.
 
 ---
@@ -40,8 +40,8 @@
 - [ ] **Add `username#crypt`, UPI VPA, and Solana Testnet Wallet fields directly to the `/login` Sign-Up form** ([`src/app/login/page.tsx`](./src/app/login/page.tsx)):
   - Currently, `/settings` and the `/crypto` Peer Registration Modal allow claiming/registering a `username#crypt` handle via `registerOrUpdateCryptUser()`, whereas `/login` only collects `name`, `email`, and `password`.
   - Wire `/login` Sign-Up mode to call `registerOrUpdateCryptUser()` so new users claim their `username#crypt` handle and auto-provision a Solana Testnet wallet address during initial account creation, plus add a quick "Switch Registered Demo User" selector on `/login`.
-- [ ] **Real Multi-Session Auth Provider (NextAuth / AWS Cognito / DynamoDB User Sessions)**:
-  - Replace local-state session switching with persistent JWT/session cookies backed by DynamoDB so multiple users logging in from separate browsers/devices authenticate against a shared cloud user table.
+- [ ] **Shared accounts across browsers**:
+  - Accounts already live in the local SQLite database. Keep sign-in on that API.
 
 ### Priority 2: Solana Testnet On-Chain Transaction Signing & SPL Transfers (`/crypto`)
 - [ ] **Serialize & Broadcast Real On-Chain `SystemProgram.transfer` / SPL Token Transactions via Phantom (`window.solana.signAndSendTransaction`)**:
@@ -50,8 +50,5 @@
 - [ ] **Automated Unit Tests for `username#crypt` Directory & Solana Testnet Helpers**:
   - Add dedicated test cases in [`tests/finance-engine.test.mjs`](./tests/finance-engine.test.mjs) covering `normalizeCryptHandle`, `isValidCryptHandle`, `resolveCryptHandle`, `searchCryptDirectory`, `generateDeterministicTestnetWallet`, and `/api/crypto/directory` `GET`/`POST` conflict handling.
 
-### Priority 3: AWS Cloud Production Wiring & DynamoDB Read Hydration
-- [ ] **Bidirectional DynamoDB Hydration (`GetItem` / `Query` on App Load)**:
-  - [`src/lib/aws-cloud.ts`](./src/lib/aws-cloud.ts) currently pushes entities via `DynamoDB_20120810.PutItem` (`syncEntityToDynamoDB`). Add `fetchEntityFromDynamoDB` (`GetItem` / `Scan` for `CRYPT_HANDLE_DIRECTORY#*`) so `/api/crypto/directory` and `/api/aws/sync` hydrate state from DynamoDB across cold serverless starts on Vercel.
-- [ ] **Provision Live AWS Resources & Populate `.env.local` / Vercel Env Vars**:
-  - Follow [`AWS_SETUP_GUIDE.md`](./AWS_SETUP_GUIDE.md) to create the `FinShieldLedger` DynamoDB table, `finshield-vault-artifacts` S3 bucket, and IAM keys, then run end-to-end cloud smoke tests.
+### Priority 3: Local receipt reading
+- [ ] Install Tesseract on the machine so `POST /ocr/scan` can read receipt photos. Without it, the photo is saved and the form stays blank for manual entry.

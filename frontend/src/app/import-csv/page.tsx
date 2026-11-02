@@ -4,25 +4,18 @@ import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFinShield } from '@/context/FinShieldContext';
 import { PageHeader, InsetGroupedList } from '@/components/primitives';
-import {
-  parseAndAnalyzeBankCSV,
-  SAMPLE_BANK_CSV,
-  SAMPLE_ICICI_CSV,
-  SAMPLE_SBI_CSV,
-  SAMPLE_AXIS_CSV,
-  formatINR,
-  type CsvAnalysisReport,
-} from '@/lib/finance-engine';
+import { parseAndAnalyzeBankCSV, formatINR, type CsvAnalysisReport } from '@/lib/finance-engine';
+import { API } from '@/lib/account-api';
 
 export default function CsvBankImportAndAiAnalysisPage() {
   const router = useRouter();
-  const { state, importCsvRowsToLedger } = useFinShield();
+  const { importCsvRowsToLedger } = useFinShield();
 
-  const [csvText, setCsvText] = useState<string>(SAMPLE_BANK_CSV);
-  const [activeSample, setActiveSample] = useState<'hdfc' | 'icici' | 'sbi' | 'axis' | 'custom'>('hdfc');
+  const [csvText, setCsvText] = useState<string>('');
   const [analyzing, setAnalyzing] = useState<boolean>(false);
   const [filterMode, setFilterMode] = useState<'all' | 'anomalies' | 'recurring'>('all');
   const [committedBanner, setCommittedBanner] = useState<string | null>(null);
+  const [aiNote, setAiNote] = useState<string | null>(null);
 
   const [customReport, setCustomReport] = useState<CsvAnalysisReport | null>(null);
   const report = useMemo(
@@ -41,49 +34,43 @@ export default function CsvBankImportAndAiAnalysisPage() {
     }));
   };
 
-  const handleLoadPreset = async (preset: 'hdfc' | 'icici' | 'sbi' | 'axis') => {
-    setActiveSample(preset);
-    const nextCsv =
-      preset === 'hdfc'
-        ? SAMPLE_BANK_CSV
-        : preset === 'icici'
-        ? SAMPLE_ICICI_CSV
-        : preset === 'sbi'
-        ? SAMPLE_SBI_CSV
-        : SAMPLE_AXIS_CSV;
-    setCsvText(nextCsv);
-    setCustomReport(null);
-    await triggerCloudAiAudit(nextCsv, `${preset}-statement-nov-2026.csv`);
-  };
-
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const text = await file.text();
-    setActiveSample('custom');
     setCsvText(text);
     setCustomReport(null);
-    await triggerCloudAiAudit(text, file.name);
+    setAiNote(null);
+    await writeLocalSummary(text);
   };
 
-  const triggerCloudAiAudit = async (rawText: string, fileName: string) => {
+  const writeLocalSummary = async (rawText: string) => {
     setAnalyzing(true);
+    const local = parseAndAnalyzeBankCSV(rawText);
+    setCustomReport(local);
+    const prompt = [
+      `Format: ${local.detectedBankFormat}.`,
+      `Credits ${formatINR(local.totalCredits)}, debits ${formatINR(local.totalDebits)}, net ${formatINR(local.netCashflow)}.`,
+      `Savings rate ${local.savingsRatePct}%.`,
+      `${local.rows.length} rows, ${local.flaggedAnomalies.length} unusual, ${local.discoveredCommitments.length} recurring.`,
+    ].join(' ');
     try {
-      const res = await fetch('/api/ai/analyze-csv', {
+      const res = await fetch(`${API}/ai/summary`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          csvText: rawText,
-          fileName,
-          awsConfig: state.awsConfig,
-        }),
+        body: JSON.stringify({ prompt, fallback: local.aiExecutiveSummary }),
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.report) setCustomReport(data.report);
+        if (Array.isArray(data.summary) && data.summary.length) {
+          setCustomReport({ ...local, aiExecutiveSummary: data.summary });
+        }
+        if (data.mode === 'ollama') setAiNote(`Written by Ollama · ${data.model}`);
+        else if (data.cached) setAiNote('Ollama did not answer. Showing the summary saved in SQLite.');
+        else setAiNote('Ollama did not answer. This summary was saved in SQLite.');
       }
     } catch {
-      // Fallback already handled by deterministic engine
+      setAiNote('Showing the summary calculated on this device.');
     } finally {
       setAnalyzing(false);
     }
@@ -144,32 +131,6 @@ export default function CsvBankImportAndAiAnalysisPage() {
       />
 
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[13px] text-[#636366] mr-1">Try a sample statement:</span>
-          {(
-            [
-              { id: 'hdfc', label: 'HDFC' },
-              { id: 'icici', label: 'ICICI' },
-              { id: 'sbi', label: 'SBI' },
-              { id: 'axis', label: 'Axis / Kotak' },
-            ] as const
-          ).map((b) => (
-            <button
-              key={b.id}
-              type="button"
-              onClick={() => handleLoadPreset(b.id)}
-              aria-pressed={activeSample === b.id}
-              className={`h-10 px-4 rounded-full text-[13px] font-medium cursor-pointer ${
-                activeSample === b.id
-                  ? 'bg-[#1C1C1E] text-white'
-                  : 'bg-[#F5F5F7] text-[#1C1C1E] hover:bg-[#EBEBED]'
-              }`}
-            >
-              {b.label}
-            </button>
-          ))}
-        </div>
-
         {committedBanner && (
           <div
             role="status"
@@ -219,6 +180,7 @@ export default function CsvBankImportAndAiAnalysisPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-6 bento-pod p-5 sm:p-6 space-y-3">
             <h2 className="text-[17px] font-semibold">Statement summary</h2>
+            {aiNote ? <p className="text-[13px] text-[#636366]">{aiNote}</p> : null}
             <ul className="space-y-2.5 text-[14px] text-[#1C1C1E]">
               {report.aiExecutiveSummary.map((bullet, idx) => (
                 <li key={idx} className="bg-white rounded-2xl p-3.5 leading-relaxed">
