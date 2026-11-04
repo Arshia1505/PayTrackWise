@@ -29,16 +29,16 @@ html.lenis body {
   scroll-behavior: auto !important;
 }
 
-.marketing {
-  color: var(--color-ink);
+html.marketing-root,
+html.marketing-root body {
   background: #ffffff;
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
 }
 
-.marketing ::selection {
+html.marketing-root ::selection {
   background: var(--color-lilac);
   color: var(--color-ink);
 }
@@ -59,7 +59,8 @@ html.lenis body {
   color: var(--color-mist);
 }
 
-.display {
+.display,
+.font-display {
   font-family: var(--font-display);
   font-weight: 300;
   letter-spacing: -0.035em;
@@ -136,10 +137,10 @@ html.lenis body {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .marketing [data-line] {
+  .marketing-root [data-line] {
     transform: translateY(110%);
   }
-  .marketing [data-reveal] {
+  .marketing-root [data-reveal] {
     opacity: 0;
     transform: translateY(28px);
   }

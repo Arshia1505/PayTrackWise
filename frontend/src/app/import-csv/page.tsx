@@ -118,7 +118,7 @@ export default function CsvBankImportAndAiAnalysisPage() {
         title="Import statement"
         description="Upload a bank CSV file to categorize transactions and spot recurring bills."
         action={
-          <label className="inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer">
+          <label className="inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer">
             <span>{analyzing ? 'Reading…' : 'Upload CSV'}</span>
             <input
               type="file"
@@ -149,26 +149,26 @@ export default function CsvBankImportAndAiAnalysisPage() {
 
         {/* Hero summary */}
         <section className="bento-pod p-6">
-          <p className="text-[13px] text-[#636366]">Net cashflow in statement</p>
+          <p className="text-[13px] text-muted">Net cashflow in statement</p>
           <p className="text-[40px] leading-[46px] font-semibold tracking-[-0.02em] tabular-nums mt-1">
             {report.netCashflow >= 0 ? '+' : '−'}
             {formatINR(Math.abs(report.netCashflow))}
           </p>
           <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5">
             <div>
-              <dt className="text-[13px] text-[#636366]">Money in</dt>
+              <dt className="text-[13px] text-muted">Money in</dt>
               <dd className="text-[18px] font-semibold tabular-nums">
                 {formatINR(report.totalCredits)}
               </dd>
             </div>
             <div>
-              <dt className="text-[13px] text-[#636366]">Money out</dt>
+              <dt className="text-[13px] text-muted">Money out</dt>
               <dd className="text-[18px] font-semibold tabular-nums">
                 {formatINR(report.totalDebits)}
               </dd>
             </div>
             <div>
-              <dt className="text-[13px] text-[#636366]">Unusual transactions</dt>
+              <dt className="text-[13px] text-muted">Unusual transactions</dt>
               <dd className="text-[18px] font-semibold tabular-nums">
                 {report.flaggedAnomalies.length}
               </dd>
@@ -180,8 +180,8 @@ export default function CsvBankImportAndAiAnalysisPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-6 bento-pod p-5 sm:p-6 space-y-3">
             <h2 className="text-[17px] font-semibold">Statement summary</h2>
-            {aiNote ? <p className="text-[13px] text-[#636366]">{aiNote}</p> : null}
-            <ul className="space-y-2.5 text-[14px] text-[#1C1C1E]">
+            {aiNote ? <p className="text-[13px] text-muted">{aiNote}</p> : null}
+            <ul className="space-y-2.5 text-[14px] text-ink">
               {report.aiExecutiveSummary.map((bullet, idx) => (
                 <li key={idx} className="bg-white rounded-2xl p-3.5 leading-relaxed">
                   {bullet}
@@ -196,22 +196,22 @@ export default function CsvBankImportAndAiAnalysisPage() {
               <button
                 type="button"
                 onClick={() => router.push('/subscriptions')}
-                className="text-[13px] font-medium text-[#1C1C1E] underline cursor-pointer min-h-[44px] inline-flex items-center"
+                className="text-[13px] font-medium text-ink underline cursor-pointer min-h-[44px] inline-flex items-center"
               >
                 All bills
               </button>
             </div>
 
-            <div className="bg-white rounded-2xl divide-y divide-black/[0.06]">
+            <div className="bg-white rounded-2xl divide-y divide-lilac/40">
               {report.discoveredCommitments.map((c, idx) => (
                 <div key={idx} className="p-3.5 flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-[14px] font-medium text-[#1C1C1E] truncate">{c.name}</p>
-                    <p className="text-[13px] text-[#636366]">
+                    <p className="text-[14px] font-medium text-ink truncate">{c.name}</p>
+                    <p className="text-[13px] text-muted">
                       {c.cadence} · {c.date}
                     </p>
                   </div>
-                  <span className="text-[14px] font-semibold text-[#1C1C1E] tabular-nums shrink-0">
+                  <span className="text-[14px] font-semibold text-ink tabular-nums shrink-0">
                     {formatINR(c.amount)}
                   </span>
                 </div>
@@ -230,7 +230,7 @@ export default function CsvBankImportAndAiAnalysisPage() {
               <div
                 role="group"
                 aria-label="Filter statement rows"
-                className="inline-flex bg-[#F5F5F7] p-1 rounded-full"
+                className="inline-flex bg-haze p-1 rounded-full"
               >
                 {[
                   { id: 'all', label: 'All' },
@@ -243,7 +243,7 @@ export default function CsvBankImportAndAiAnalysisPage() {
                     aria-pressed={filterMode === f.id}
                     onClick={() => setFilterMode(f.id as 'all' | 'anomalies' | 'recurring')}
                     className={`h-9 px-4 rounded-full text-[13px] font-medium cursor-pointer ${
-                      filterMode === f.id ? 'bg-[#1C1C1E] text-white' : 'text-[#636366]'
+                      filterMode === f.id ? 'bg-ink text-white' : 'text-muted'
                     }`}
                   >
                     {f.label}
@@ -256,7 +256,7 @@ export default function CsvBankImportAndAiAnalysisPage() {
               type="button"
               onClick={handleCommitSelectedToVault}
               disabled={selectedCount === 0}
-              className="h-11 sm:h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer disabled:opacity-50 self-start sm:self-auto"
+              className="h-11 sm:h-10 px-5 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer disabled:opacity-50 self-start sm:self-auto"
             >
               Import {selectedCount} selected
             </button>
@@ -275,26 +275,26 @@ export default function CsvBankImportAndAiAnalysisPage() {
                       type="checkbox"
                       checked={checked}
                       onChange={() => toggleRowSelection(row.id)}
-                      className="w-5 h-5 accent-[#1C1C1E] rounded mt-0.5 cursor-pointer shrink-0"
+                      className="w-5 h-5 accent-ink rounded mt-0.5 cursor-pointer shrink-0"
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[15px] font-medium text-[#1C1C1E]">
+                        <span className="text-[15px] font-medium text-ink">
                           {row.merchant}
                         </span>
                         {row.anomalyStatus !== 'NORMAL' && (
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-[12px] font-medium ${
                               row.anomalyStatus === 'HIGH_DEVIATION'
-                                ? 'bg-[#FF453A]/15 text-[#D70015]'
-                                : 'bg-[#FF9F0A]/15 text-[#B25000]'
+                                ? 'bg-glow/15 text-glow'
+                                : 'bg-azure/15 text-azure'
                             }`}
                           >
                             Unusual amount
                           </span>
                         )}
                       </div>
-                      <p className="text-[13px] text-[#636366]">
+                      <p className="text-[13px] text-muted">
                         {row.category} · {row.date}
                       </p>
                     </div>
@@ -302,7 +302,7 @@ export default function CsvBankImportAndAiAnalysisPage() {
 
                   <span
                     className={`text-[15px] font-medium tabular-nums shrink-0 ${
-                      row.type === 'credit' ? 'text-[#1E8E3E]' : 'text-[#1C1C1E]'
+                      row.type === 'credit' ? 'text-[#1E8E3E]' : 'text-ink'
                     }`}
                   >
                     {row.type === 'credit' ? '+' : '−'}

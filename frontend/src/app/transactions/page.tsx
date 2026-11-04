@@ -18,7 +18,7 @@ const CATEGORIES = [
 ];
 
 const FIELD =
-  'w-full h-11 px-4 rounded-2xl bg-[#F5F5F7] text-[14px] text-[#1C1C1E] focus:outline-none focus:ring-2 focus:ring-[#1C1C1E]';
+  'w-full h-11 px-4 rounded-2xl bg-haze text-[14px] text-ink focus:outline-none focus:ring-2 focus:ring-ink';
 
 export default function TransactionsPage() {
   const { state } = useFinShield();
@@ -62,7 +62,7 @@ export default function TransactionsPage() {
         action={
           <Link
             href="/import-csv"
-            className="inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-[#F5F5F7] hover:bg-[#EBEBED] text-[14px] font-medium text-[#1C1C1E]"
+            className="inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-haze hover:bg-peri text-[14px] font-medium text-ink"
           >
             Import statement
           </Link>
@@ -73,7 +73,7 @@ export default function TransactionsPage() {
         <div className="bento-pod p-5 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_220px] gap-3">
             <div>
-              <label htmlFor="tx-search" className="text-[13px] text-[#636366] block mb-1.5">
+              <label htmlFor="tx-search" className="text-[13px] text-muted block mb-1.5">
                 Search
               </label>
               <input
@@ -86,7 +86,7 @@ export default function TransactionsPage() {
               />
             </div>
             <div>
-              <label htmlFor="tx-category" className="text-[13px] text-[#636366] block mb-1.5">
+              <label htmlFor="tx-category" className="text-[13px] text-muted block mb-1.5">
                 Category
               </label>
               <select
@@ -105,7 +105,7 @@ export default function TransactionsPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="inline-flex bg-[#F5F5F7] p-1 rounded-full self-start" role="group" aria-label="Transaction type">
+            <div className="inline-flex bg-haze p-1 rounded-full self-start" role="group" aria-label="Transaction type">
               {(['all', 'debit', 'credit'] as const).map((t) => (
                 <button
                   key={t}
@@ -113,30 +113,30 @@ export default function TransactionsPage() {
                   onClick={() => setTypeFilter(t)}
                   aria-pressed={typeFilter === t}
                   className={`h-10 sm:h-9 px-4 rounded-full text-[14px] font-medium cursor-pointer ${
-                    typeFilter === t ? 'bg-[#1C1C1E] text-white' : 'text-[#636366]'
+                    typeFilter === t ? 'bg-ink text-white' : 'text-muted'
                   }`}
                 >
                   {t === 'all' ? 'All' : t === 'debit' ? 'Spent' : 'Received'}
                 </button>
               ))}
             </div>
-            <p className="text-[13px] text-[#636366] tabular-nums">
+            <p className="text-[13px] text-muted tabular-nums">
               Spent {formatINR(totalOut)} · Received {formatINR(totalIn)}
             </p>
           </div>
         </div>
 
-        <div className="bento-pod overflow-hidden divide-y divide-black/[0.06]">
+        <div className="bento-pod overflow-hidden divide-y divide-lilac/40">
           {filteredTransactions.length === 0 ? (
             <div className="p-10 text-center">
-              <p className="text-[15px] text-[#636366]">
+              <p className="text-[15px] text-muted">
                 {filtersActive ? 'No transactions match these filters.' : 'No transactions yet.'}
               </p>
               {filtersActive && (
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="mt-4 h-11 sm:h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer"
+                  className="mt-4 h-11 sm:h-10 px-5 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer"
                 >
                   Clear filters
                 </button>
@@ -146,14 +146,14 @@ export default function TransactionsPage() {
             filteredTransactions.map((tx) => (
               <div key={tx.id} className="px-5 py-4 flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-[15px] font-medium text-[#1C1C1E] truncate">{tx.merchant}</p>
-                  <p className="text-[13px] text-[#636366] truncate">
+                  <p className="text-[15px] font-medium text-ink truncate">{tx.merchant}</p>
+                  <p className="text-[13px] text-muted truncate">
                     {tx.category} · {tx.date}, {tx.time}
                   </p>
                 </div>
                 <span
                   className={`text-[15px] font-medium tabular-nums shrink-0 ${
-                    tx.type === 'credit' ? 'text-[#1E8E3E]' : 'text-[#1C1C1E]'
+                    tx.type === 'credit' ? 'text-[#1E8E3E]' : 'text-ink'
                   }`}
                 >
                   {tx.type === 'credit' ? '+' : '−'}

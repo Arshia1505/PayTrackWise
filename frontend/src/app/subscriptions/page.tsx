@@ -14,11 +14,11 @@ type UtilityType =
   | 'Rent & Maintenance';
 
 const FIELD =
-  'w-full h-11 px-4 rounded-2xl bg-[#F5F5F7] text-[14px] text-[#1C1C1E] tabular-nums focus:outline-none focus:ring-2 focus:ring-[#1C1C1E]';
+  'w-full h-11 px-4 rounded-2xl bg-haze text-[14px] text-ink tabular-nums focus:outline-none focus:ring-2 focus:ring-ink';
 const PRIMARY =
-  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer';
+  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer';
 const SECONDARY =
-  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-[#F5F5F7] hover:bg-[#EBEBED] text-[#1C1C1E] text-[14px] font-medium cursor-pointer';
+  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-haze hover:bg-peri text-ink text-[14px] font-medium cursor-pointer';
 
 export default function SubscriptionsPage() {
   const router = useRouter();
@@ -90,7 +90,7 @@ export default function SubscriptionsPage() {
       />
 
       <div className="space-y-6">
-        <div className="inline-flex bg-[#F5F5F7] p-1 rounded-full" role="group" aria-label="Section">
+        <div className="inline-flex bg-haze p-1 rounded-full" role="group" aria-label="Section">
           {(['subscriptions', 'utilities'] as const).map((t) => (
             <button
               key={t}
@@ -98,7 +98,7 @@ export default function SubscriptionsPage() {
               onClick={() => setActiveTab(t)}
               aria-pressed={activeTab === t}
               className={`h-11 sm:h-9 px-5 rounded-full text-[14px] font-medium cursor-pointer ${
-                activeTab === t ? 'bg-[#1C1C1E] text-white' : 'text-[#636366]'
+                activeTab === t ? 'bg-ink text-white' : 'text-muted'
               }`}
             >
               {t === 'subscriptions' ? 'Subscriptions' : 'Bills'}
@@ -109,22 +109,22 @@ export default function SubscriptionsPage() {
         {isSubs ? (
           <>
             <section className="bento-pod p-6">
-              <p className="text-[13px] text-[#636366]">Monthly subscriptions</p>
+              <p className="text-[13px] text-muted">Monthly subscriptions</p>
               <p className="text-[40px] leading-[46px] font-semibold tracking-[-0.02em] tabular-nums mt-1">
                 {formatINR(monthlySubsTotal)}
               </p>
-              <p className="text-[13px] text-[#636366] mt-2">{activeSubs.length} active</p>
+              <p className="text-[13px] text-muted mt-2">{activeSubs.length} active</p>
             </section>
 
             {state.subscriptions.length === 0 ? (
               <div className="bento-pod p-10 text-center">
-                <p className="text-[15px] text-[#636366]">No subscriptions yet.</p>
+                <p className="text-[15px] text-muted">No subscriptions yet.</p>
                 <button type="button" onClick={() => setIsAddModalOpen(true)} className={`${PRIMARY} mt-4`}>
                   Add subscription
                 </button>
               </div>
             ) : (
-              <div className="bento-pod overflow-hidden divide-y divide-black/[0.06]">
+              <div className="bento-pod overflow-hidden divide-y divide-lilac/40">
                 {state.subscriptions.map((sub) => {
                   const isPaused = sub.status === 'PAUSED';
                   return (
@@ -136,25 +136,25 @@ export default function SubscriptionsPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <p
                             className={`text-[15px] font-medium ${
-                              isPaused ? 'text-[#8E8E93]' : 'text-[#1C1C1E]'
+                              isPaused ? 'text-mist' : 'text-ink'
                             }`}
                           >
                             {sub.name}
                           </p>
                           {sub.priceHikeAlert && (
-                            <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[#FF9F0A]/15 text-[#B25000]">
+                            <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-azure/15 text-azure">
                               {sub.priceHikeAlert}
                             </span>
                           )}
                         </div>
-                        <p className="text-[13px] text-[#636366]">
+                        <p className="text-[13px] text-muted">
                           {isPaused ? 'Paused' : `Renews ${sub.nextRenewalDate}`} · {sub.billingCycle}
                         </p>
                       </div>
                       <div className="flex items-center justify-between sm:justify-end gap-4">
                         <span className="text-[15px] font-medium tabular-nums">
                           {formatINR(sub.amount)}
-                          <span className="text-[13px] font-normal text-[#636366]">/mo</span>
+                          <span className="text-[13px] font-normal text-muted">/mo</span>
                         </span>
                         <button
                           type="button"
@@ -173,12 +173,12 @@ export default function SubscriptionsPage() {
         ) : (
           <>
             <section className="bento-pod p-6">
-              <p className="text-[13px] text-[#636366]">Bills to pay</p>
+              <p className="text-[13px] text-muted">Bills to pay</p>
               <p className="text-[40px] leading-[46px] font-semibold tracking-[-0.02em] tabular-nums mt-1">
                 {formatINR(totalUnpaidUtilities)}
               </p>
               <div className="flex items-center justify-between gap-3 flex-wrap mt-2">
-                <p className="text-[13px] text-[#636366]">
+                <p className="text-[13px] text-muted">
                   {unpaidUtilities.length === 0 ? 'All paid' : `${unpaidUtilities.length} unpaid`}
                 </p>
                 <button type="button" onClick={() => router.push('/ocr')} className={SECONDARY}>
@@ -189,7 +189,7 @@ export default function SubscriptionsPage() {
 
             {state.utilityBills.length === 0 ? (
               <div className="bento-pod p-10 text-center">
-                <p className="text-[15px] text-[#636366]">No bills yet.</p>
+                <p className="text-[15px] text-muted">No bills yet.</p>
                 <button type="button" onClick={() => setIsAddModalOpen(true)} className={`${PRIMARY} mt-4`}>
                   Add bill
                 </button>
@@ -205,11 +205,11 @@ export default function SubscriptionsPage() {
                     <div key={bill.id} className="bento-pod p-5 flex flex-col gap-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <h3 className="text-[15px] font-medium text-[#1C1C1E]">{bill.provider}</h3>
-                          <p className="text-[13px] text-[#636366]">{bill.utilityType}</p>
+                          <h3 className="text-[15px] font-medium text-ink">{bill.provider}</h3>
+                          <p className="text-[13px] text-muted">{bill.utilityType}</p>
                         </div>
                         {!isPaid && (
-                          <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[#FF9F0A]/15 text-[#B25000] whitespace-nowrap">
+                          <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-azure/15 text-azure whitespace-nowrap">
                             Due {bill.dueDate}
                           </span>
                         )}
@@ -218,7 +218,7 @@ export default function SubscriptionsPage() {
                         <p className="text-[24px] leading-[30px] font-semibold tabular-nums">
                           {formatINR(bill.amount)}
                         </p>
-                        <p className="text-[13px] text-[#636366] tabular-nums">
+                        <p className="text-[13px] text-muted tabular-nums">
                           {isPaid ? 'Paid · ' : ''}
                           {delta === 0
                             ? 'Same as last month'
@@ -272,7 +272,7 @@ export default function SubscriptionsPage() {
       >
         <form onSubmit={handleAddSubmit} className="space-y-4">
           <div>
-            <label htmlFor="sub-name" className="text-[13px] text-[#636366] block mb-1.5">
+            <label htmlFor="sub-name" className="text-[13px] text-muted block mb-1.5">
               {isSubs ? 'Name' : 'Provider'}
             </label>
             <input
@@ -288,7 +288,7 @@ export default function SubscriptionsPage() {
           {!isSubs && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label htmlFor="bill-type" className="text-[13px] text-[#636366] block mb-1.5">
+                <label htmlFor="bill-type" className="text-[13px] text-muted block mb-1.5">
                   Type
                 </label>
                 <select
@@ -305,7 +305,7 @@ export default function SubscriptionsPage() {
                 </select>
               </div>
               <div>
-                <label htmlFor="bill-consumer" className="text-[13px] text-[#636366] block mb-1.5">
+                <label htmlFor="bill-consumer" className="text-[13px] text-muted block mb-1.5">
                   Account number
                 </label>
                 <input
@@ -320,7 +320,7 @@ export default function SubscriptionsPage() {
           )}
 
           <div>
-            <label htmlFor="sub-amount" className="text-[13px] text-[#636366] block mb-1.5">
+            <label htmlFor="sub-amount" className="text-[13px] text-muted block mb-1.5">
               Amount (₹)
             </label>
             <input

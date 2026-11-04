@@ -105,6 +105,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
         display: ["var(--font-inter-tight)", "Inter", "sans-serif"],
+        serif: ["var(--font-instrument-serif)", "Georgia", "serif"],
         michroma: ["var(--font-michroma-face)", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
         "label-caps": ["Inter", "sans-serif"],

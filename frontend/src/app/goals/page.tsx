@@ -6,16 +6,16 @@ import { PageHeader, UniversalSheetModal } from '@/components/primitives';
 import { formatINR } from '@/lib/finance-engine';
 
 const FIELD =
-  'w-full h-11 px-4 rounded-2xl bg-[#F5F5F7] text-[14px] text-[#1C1C1E] tabular-nums focus:outline-none focus:ring-2 focus:ring-[#1C1C1E]';
+  'w-full h-11 px-4 rounded-2xl bg-haze text-[14px] text-ink tabular-nums focus:outline-none focus:ring-2 focus:ring-ink';
 const PRIMARY =
-  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer';
+  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer';
 const SECONDARY =
-  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-[#F5F5F7] hover:bg-[#EBEBED] text-[#1C1C1E] text-[14px] font-medium cursor-pointer';
+  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-haze hover:bg-peri text-ink text-[14px] font-medium cursor-pointer';
 
 function Bar({ pct }: { pct: number }) {
   return (
-    <div className="h-2 w-full rounded-full bg-[#E5E5EA] overflow-hidden">
-      <div className="h-full rounded-full bg-[#1C1C1E]" style={{ width: `${pct}%` }} />
+    <div className="h-2 w-full rounded-full bg-peri overflow-hidden">
+      <div className="h-full rounded-full bg-ink" style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -123,7 +123,7 @@ export default function GoalsPage() {
 
       <div className="space-y-6">
         <div
-          className="inline-flex bg-[#F5F5F7] p-1 rounded-full"
+          className="inline-flex bg-haze p-1 rounded-full"
           role="group"
           aria-label="Section"
         >
@@ -134,7 +134,7 @@ export default function GoalsPage() {
               onClick={() => setActiveTab(t)}
               aria-pressed={activeTab === t}
               className={`h-11 sm:h-9 px-5 rounded-full text-[14px] font-medium cursor-pointer ${
-                activeTab === t ? 'bg-[#1C1C1E] text-white' : 'text-[#636366]'
+                activeTab === t ? 'bg-ink text-white' : 'text-muted'
               }`}
             >
               {t === 'goals' ? 'Goals' : 'Debts'}
@@ -145,21 +145,21 @@ export default function GoalsPage() {
         {activeTab === 'goals' ? (
           <>
             <section className="bento-pod p-6">
-              <p className="text-[13px] text-[#636366]">Saved across all goals</p>
+              <p className="text-[13px] text-muted">Saved across all goals</p>
               <p className="text-[40px] leading-[46px] font-semibold tracking-[-0.02em] tabular-nums mt-1">
                 {formatINR(totalGoalSaved)}
               </p>
               <div className="mt-5">
                 <Bar pct={goalPct} />
               </div>
-              <p className="text-[13px] text-[#636366] mt-2 tabular-nums">
+              <p className="text-[13px] text-muted mt-2 tabular-nums">
                 {goalPct}% of {formatINR(totalGoalTarget)}
               </p>
             </section>
 
             {state.goals.length === 0 ? (
               <div className="bento-pod p-10 text-center">
-                <p className="text-[15px] text-[#636366]">No goals yet.</p>
+                <p className="text-[15px] text-muted">No goals yet.</p>
                 <button
                   type="button"
                   onClick={() => setIsAddGoalOpen(true)}
@@ -175,16 +175,16 @@ export default function GoalsPage() {
                   return (
                     <div key={g.id} className="bento-pod p-5 flex flex-col gap-4">
                       <div>
-                        <h3 className="text-[15px] font-medium text-[#1C1C1E]">{g.name}</h3>
-                        <p className="text-[13px] text-[#636366]">By {g.targetDate}</p>
+                        <h3 className="text-[15px] font-medium text-ink">{g.name}</h3>
+                        <p className="text-[13px] text-muted">By {g.targetDate}</p>
                       </div>
                       <div className="space-y-2">
                         <Bar pct={pct} />
-                        <p className="text-[13px] text-[#636366] tabular-nums">
+                        <p className="text-[13px] text-muted tabular-nums">
                           {formatINR(g.saved)} of {formatINR(g.target)}
                         </p>
                       </div>
-                      <p className="text-[13px] text-[#636366] tabular-nums">
+                      <p className="text-[13px] text-muted tabular-nums">
                         {formatINR(g.monthlyContribution)}/month{g.autoSip ? ', automatic' : ''}
                       </p>
                       <button
@@ -206,21 +206,21 @@ export default function GoalsPage() {
         ) : (
           <>
             <section className="bento-pod p-6">
-              <p className="text-[13px] text-[#636366]">Remaining to repay</p>
+              <p className="text-[13px] text-muted">Remaining to repay</p>
               <p className="text-[40px] leading-[46px] font-semibold tracking-[-0.02em] tabular-nums mt-1">
                 {formatINR(totalDebtRemaining)}
               </p>
               <div className="mt-5">
                 <Bar pct={debtPct} />
               </div>
-              <p className="text-[13px] text-[#636366] mt-2 tabular-nums">
+              <p className="text-[13px] text-muted mt-2 tabular-nums">
                 {debtPct}% repaid of {formatINR(totalDebtPrincipal)}
               </p>
             </section>
 
             {state.debts.length === 0 ? (
               <div className="bento-pod p-10 text-center">
-                <p className="text-[15px] text-[#636366]">No debts tracked.</p>
+                <p className="text-[15px] text-muted">No debts tracked.</p>
                 <button
                   type="button"
                   onClick={() => setIsAddDebtOpen(true)}
@@ -237,18 +237,18 @@ export default function GoalsPage() {
                   return (
                     <div key={d.id} className="bento-pod p-5 flex flex-col gap-4">
                       <div>
-                        <h3 className="text-[15px] font-medium text-[#1C1C1E]">{d.name}</h3>
-                        <p className="text-[13px] text-[#636366]">
+                        <h3 className="text-[15px] font-medium text-ink">{d.name}</h3>
+                        <p className="text-[13px] text-muted">
                           {d.lender} · {d.apr}% interest · {d.remainingMonths} months left
                         </p>
                       </div>
                       <div className="space-y-2">
                         <Bar pct={pct} />
-                        <p className="text-[13px] text-[#636366] tabular-nums">
+                        <p className="text-[13px] text-muted tabular-nums">
                           {formatINR(d.paidPrincipal)} of {formatINR(d.totalLoan)} repaid
                         </p>
                       </div>
-                      <p className="text-[13px] text-[#636366] tabular-nums">
+                      <p className="text-[13px] text-muted tabular-nums">
                         {formatINR(d.emi)} due {d.nextDueDate}
                       </p>
                       <button
@@ -275,7 +275,7 @@ export default function GoalsPage() {
       >
         <form onSubmit={handleContributionSubmit} className="space-y-4">
           <div>
-            <label htmlFor="contribute-amount" className="text-[13px] text-[#636366] block mb-1.5">
+            <label htmlFor="contribute-amount" className="text-[13px] text-muted block mb-1.5">
               Amount (₹)
             </label>
             <input
@@ -301,7 +301,7 @@ export default function GoalsPage() {
       >
         <form onSubmit={handleCreateDebt} className="space-y-4">
           <div>
-            <label htmlFor="debt-name" className="text-[13px] text-[#636366] block mb-1.5">
+            <label htmlFor="debt-name" className="text-[13px] text-muted block mb-1.5">
               What is it
             </label>
             <input
@@ -315,7 +315,7 @@ export default function GoalsPage() {
             />
           </div>
           <div>
-            <label htmlFor="debt-lender" className="text-[13px] text-[#636366] block mb-1.5">
+            <label htmlFor="debt-lender" className="text-[13px] text-muted block mb-1.5">
               Lender
             </label>
             <input
@@ -329,7 +329,7 @@ export default function GoalsPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="debt-total" className="text-[13px] text-[#636366] block mb-1.5">
+              <label htmlFor="debt-total" className="text-[13px] text-muted block mb-1.5">
                 Amount left (₹)
               </label>
               <input
@@ -345,7 +345,7 @@ export default function GoalsPage() {
               />
             </div>
             <div>
-              <label htmlFor="debt-emi" className="text-[13px] text-[#636366] block mb-1.5">
+              <label htmlFor="debt-emi" className="text-[13px] text-muted block mb-1.5">
                 Monthly EMI (₹)
               </label>
               <input
@@ -361,7 +361,7 @@ export default function GoalsPage() {
               />
             </div>
             <div>
-              <label htmlFor="debt-apr" className="text-[13px] text-[#636366] block mb-1.5">
+              <label htmlFor="debt-apr" className="text-[13px] text-muted block mb-1.5">
                 Interest (% a year)
               </label>
               <input
@@ -377,7 +377,7 @@ export default function GoalsPage() {
               />
             </div>
             <div>
-              <label htmlFor="debt-months" className="text-[13px] text-[#636366] block mb-1.5">
+              <label htmlFor="debt-months" className="text-[13px] text-muted block mb-1.5">
                 Months left
               </label>
               <input
@@ -393,7 +393,7 @@ export default function GoalsPage() {
             </div>
           </div>
           <div>
-            <label htmlFor="debt-due" className="text-[13px] text-[#636366] block mb-1.5">
+            <label htmlFor="debt-due" className="text-[13px] text-muted block mb-1.5">
               Next due date
             </label>
             <input
@@ -419,7 +419,7 @@ export default function GoalsPage() {
       >
         <form onSubmit={handleCreateGoal} className="space-y-4">
           <div>
-            <label htmlFor="goal-name" className="text-[13px] text-[#636366] block mb-1.5">
+            <label htmlFor="goal-name" className="text-[13px] text-muted block mb-1.5">
               Name
             </label>
             <input
@@ -433,7 +433,7 @@ export default function GoalsPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="goal-target" className="text-[13px] text-[#636366] block mb-1.5">
+              <label htmlFor="goal-target" className="text-[13px] text-muted block mb-1.5">
                 Target amount (₹)
               </label>
               <input
@@ -447,7 +447,7 @@ export default function GoalsPage() {
               />
             </div>
             <div>
-              <label htmlFor="goal-sip" className="text-[13px] text-[#636366] block mb-1.5">
+              <label htmlFor="goal-sip" className="text-[13px] text-muted block mb-1.5">
                 Monthly saving (₹)
               </label>
               <input

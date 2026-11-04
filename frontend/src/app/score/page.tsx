@@ -92,40 +92,40 @@ export default function GenericScorePage() {
       />
 
       <section className="bento-pod p-6 mb-6">
-        <p className="text-[13px] text-[#636366]">Generic Score</p>
-        <p className="text-[56px] leading-none font-semibold tracking-[-0.03em] tabular-nums mt-2">
+        <p className="text-[13px] text-muted">Generic Score</p>
+        <p className="mt-2 font-display text-[56px] leading-none font-light tracking-[-0.035em] tabular-nums text-ink">
           {loading && score === null ? '…' : score ?? '—'}
         </p>
         <p className="text-[17px] font-medium mt-3">{result?.rating || (loading ? 'Reading transactions' : 'No score yet')}</p>
         {result && (
-          <p className="text-[13px] text-[#636366] mt-1">
+          <p className="text-[13px] text-muted mt-1">
             {result.transactionCount} transaction{result.transactionCount === 1 ? '' : 's'} ·{' '}
             {formatINR(result.moneyIn)} in · {formatINR(result.moneyOut)} out
             {result.mode === 'ollama' ? ' · read with local AI' : ' · read from your totals'}
           </p>
         )}
         {note && (
-          <p role="status" className="text-[14px] text-[#636366] mt-3">
+          <p role="status" className="text-[14px] text-muted mt-3">
             {note}
           </p>
         )}
       </section>
 
       <h2 className="text-[17px] font-semibold mb-3">Score ratings</h2>
-      <ol className="bento-pod divide-y divide-[#E5E5EA] mb-6">
+      <ol className="bento-pod divide-y divide-peri mb-6">
         {bands.map((band) => {
           const current = score !== null && score >= band.from && score <= band.to;
           return (
             <li
               key={band.label}
-              className={`px-5 py-4 flex items-center justify-between gap-4 ${current ? 'bg-[#F5F5F7]' : ''}`}
+              className={`px-5 py-4 flex items-center justify-between gap-4 ${current ? 'bg-haze' : ''}`}
               aria-current={current ? 'true' : undefined}
             >
               <span className="text-[15px] font-medium">
                 {band.label}
                 {current ? ' · your rating' : ''}
               </span>
-              <span className="text-[14px] tabular-nums text-[#636366]">
+              <span className="text-[14px] tabular-nums text-muted">
                 {band.from}–{band.to}
               </span>
             </li>
@@ -134,9 +134,9 @@ export default function GenericScorePage() {
       </ol>
 
       <h2 className="text-[17px] font-semibold mb-3">What would raise it</h2>
-      <ul className="bento-pod divide-y divide-[#E5E5EA]">
+      <ul className="bento-pod divide-y divide-peri">
         {loading && !result ? (
-          <li className="px-5 py-4 text-[14px] text-[#636366]">Reading your transactions…</li>
+          <li className="px-5 py-4 text-[14px] text-muted">Reading your transactions…</li>
         ) : result?.improvements?.length ? (
           result.improvements.map((tip) => (
             <li key={tip} className="px-5 py-4 text-[15px] leading-6">
@@ -144,7 +144,7 @@ export default function GenericScorePage() {
             </li>
           ))
         ) : (
-          <li className="px-5 py-4 text-[14px] text-[#636366]">
+          <li className="px-5 py-4 text-[14px] text-muted">
             Add a few transactions, then open this page again.
           </li>
         )}

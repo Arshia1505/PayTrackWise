@@ -5,19 +5,20 @@ import { useRouter } from 'next/navigation';
 import { useFinShield, type ThemeAccentToken } from '@/context/FinShieldContext';
 import { PageHeader } from '@/components/primitives';
 import { API } from '@/lib/account-api';
+import { clearSession } from '@/lib/session';
 
 const ACCENT_PRESETS: Array<{ id: ThemeAccentToken; label: string; hex: string }> = [
-  { id: 'obsidian', label: 'Black', hex: '#1C1C1E' },
-  { id: 'orange', label: 'Orange', hex: '#FF5500' },
-  { id: 'electric', label: 'Blue', hex: '#007AFF' },
-  { id: 'emerald', label: 'Green', hex: '#1E8E3E' },
+  { id: 'obsidian', label: 'Ink', hex: '#1c1b3a' },
+  { id: 'orange', label: 'Iris', hex: '#8f7df0' },
+  { id: 'electric', label: 'Azure', hex: '#3d86ff' },
+  { id: 'emerald', label: 'Glow', hex: '#e35fc9' },
 ];
 
 const inputCls =
-  'w-full h-11 px-4 rounded-[16px] bg-[#F5F5F7] text-[14px] text-[#1C1C1E] placeholder:text-[#8E8E93] outline-none focus:ring-2 focus:ring-[#1C1C1E]/20';
-const labelCls = 'text-[13px] text-[#636366] block mb-1.5';
+  'w-full h-11 px-4 rounded-[16px] bg-haze text-[14px] text-ink placeholder:text-mist outline-none focus:ring-2 focus:ring-ink/20';
+const labelCls = 'text-[13px] text-muted block mb-1.5';
 const secondaryBtn =
-  'inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#F5F5F7] text-[#1C1C1E] text-[14px] font-medium cursor-pointer hover:bg-[#EBEBED]';
+  'inline-flex items-center justify-center h-10 px-5 rounded-full bg-haze text-ink text-[14px] font-medium cursor-pointer hover:bg-peri';
 
 export default function SettingsPage() {
   const {
@@ -95,7 +96,7 @@ export default function SettingsPage() {
               </div>
               <div className="min-w-0">
                 <div className="text-[15px] font-medium truncate">{state.profile.name}</div>
-                <div className="text-[13px] text-[#636366] truncate">{state.profile.email}</div>
+                <div className="text-[13px] text-muted truncate">{state.profile.email}</div>
               </div>
             </div>
             <div>
@@ -120,6 +121,23 @@ export default function SettingsPage() {
             </div>
           </section>
 
+          <section className="bento-pod p-5 sm:p-6 space-y-3" aria-labelledby="session-h">
+            <h2 id="session-h" className="text-[17px] font-semibold">Account</h2>
+            <p className="text-[13px] text-muted">
+              Sign out of this device. Your data stays here until you reset it.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                clearSession();
+                router.replace('/');
+              }}
+              className="inline-flex items-center justify-center h-10 px-5 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer hover:bg-ink-soft"
+            >
+              Log out
+            </button>
+          </section>
+
           <section className="bento-pod p-5 sm:p-6 space-y-4" aria-labelledby="appearance-h">
             <h2 id="appearance-h" className="text-[17px] font-semibold">Accent colour</h2>
             <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Accent colour">
@@ -134,7 +152,7 @@ export default function SettingsPage() {
                     aria-label={preset.label}
                     onClick={() => updateSettings({ themeAccent: preset.id })}
                     className={`h-11 pl-3 pr-4 rounded-full flex items-center gap-2 text-[14px] font-medium cursor-pointer ${
-                      active ? 'bg-[#1C1C1E] text-white' : 'bg-[#F5F5F7] text-[#1C1C1E] hover:bg-[#EBEBED]'
+                      active ? 'bg-ink text-white' : 'bg-haze text-ink hover:bg-peri'
                     }`}
                   >
                     <span className="w-5 h-5 rounded-full" style={{ backgroundColor: preset.hex }} />
@@ -149,7 +167,7 @@ export default function SettingsPage() {
         <div className="space-y-6 min-w-0">
           <section className="bento-pod p-5 sm:p-6" aria-labelledby="prefs-h">
             <h2 id="prefs-h" className="text-[17px] font-semibold mb-2">Preferences</h2>
-            <div className="divide-y divide-black/[0.06]">
+            <div className="divide-y divide-lilac/40">
               {toggles.map((item) => (
                 <label
                   key={item.key}
@@ -157,13 +175,13 @@ export default function SettingsPage() {
                 >
                   <span className="min-w-0">
                     <span className="text-[15px] font-medium block">{item.title}</span>
-                    <span className="text-[13px] text-[#636366]">{item.desc}</span>
+                    <span className="text-[13px] text-muted">{item.desc}</span>
                   </span>
                   <input
                     type="checkbox"
                     checked={Boolean(state.settings[item.key])}
                     onChange={(e) => updateSettings({ [item.key]: e.target.checked })}
-                    className="w-5 h-5 accent-[#1C1C1E] shrink-0 cursor-pointer"
+                    className="w-5 h-5 accent-ink shrink-0 cursor-pointer"
                   />
                 </label>
               ))}
@@ -183,7 +201,7 @@ export default function SettingsPage() {
             <div className="pt-2">
               {confirmReset ? (
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[13px] text-[#636366]">Erase all data on this device and sign out?</span>
+                  <span className="text-[13px] text-muted">Erase all data on this device and sign out?</span>
                   <button
                     type="button"
                     onClick={() => {
@@ -191,7 +209,7 @@ export default function SettingsPage() {
                       setConfirmReset(false);
                       router.replace('/signin');
                     }}
-                    className="inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#FF453A]/15 text-[#D70015] text-[14px] font-medium cursor-pointer"
+                    className="inline-flex items-center justify-center h-10 px-5 rounded-full bg-glow/15 text-glow text-[14px] font-medium cursor-pointer"
                   >
                     Yes, reset
                   </button>
@@ -203,7 +221,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setConfirmReset(true)}
-                  className="inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#FF453A]/15 text-[#D70015] text-[14px] font-medium cursor-pointer"
+                  className="inline-flex items-center justify-center h-10 px-5 rounded-full bg-glow/15 text-glow text-[14px] font-medium cursor-pointer"
                 >
                   Reset demo data
                 </button>
@@ -214,11 +232,11 @@ export default function SettingsPage() {
           <section className="bento-pod p-5 sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-[17px] font-semibold">Local engine</h2>
-              <span className="text-[13px] text-[#636366]">
+              <span className="text-[13px] text-muted">
                 {engine ? (engine.ollama ? 'Ollama ready' : 'SQLite only') : 'Checking'}
               </span>
             </div>
-            <p className="text-[13px] text-[#636366] mt-3">
+            <p className="text-[13px] text-muted mt-3">
               Accounts, receipts, and statement summaries stay in SQLite on this machine.
               {engine?.model ? ` Summaries use ${engine.model}.` : ''}
             </p>

@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { SmoothScroll } from "@/components/providers/SmoothScroll";
-import { CanvasMount } from "@/components/three/CanvasMount";
 import { Nav } from "@/components/sections/Nav";
 import { Hero } from "@/components/sections/Hero";
 import { Loop } from "@/components/sections/Loop";
@@ -20,22 +18,19 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <SmoothScroll>
-      <div className="marketing bg-white text-ink">
-        <CanvasMount />
-        <Nav />
-        <main>
-          <Hero />
-          <Loop />
-          <Pillars />
-          <Showcase />
-          <Bento />
-          <Honest />
-          <Essentials />
-          <Cta />
-        </main>
-        <Footer />
-      </div>
-    </SmoothScroll>
+    <>
+      <Nav />
+      <main>
+        <Hero />
+        <Loop />
+        <Pillars />
+        <Showcase />
+        <Bento />
+        <Honest />
+        <Essentials />
+        <Cta />
+      </main>
+      <Footer />
+    </>
   );
 }

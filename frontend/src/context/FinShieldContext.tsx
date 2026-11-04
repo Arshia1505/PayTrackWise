@@ -349,12 +349,12 @@ export function FinShieldProvider({ children }: { children: React.ReactNode }) {
 
     const accentHex =
       state.settings.themeAccent === 'orange'
-        ? '#FF5500'
+        ? '#8f7df0'
         : state.settings.themeAccent === 'electric'
-        ? '#007AFF'
+        ? '#3d86ff'
         : state.settings.themeAccent === 'emerald'
-        ? '#1E8E3E'
-        : '#1C1C1E';
+        ? '#8f7df0'
+        : '#1c1b3a';
 
     document.documentElement.style.setProperty('--accent-primary', accentHex);
   }, [state]);

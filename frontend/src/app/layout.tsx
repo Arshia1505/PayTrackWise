@@ -43,7 +43,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased selection:bg-[#1C1C1E] selection:text-white">
+      <body className="antialiased">
         <FinShieldProvider>
           <AppShell>{children}</AppShell>
         </FinShieldProvider>

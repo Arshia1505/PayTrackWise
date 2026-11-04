@@ -33,7 +33,7 @@ export default function NotificationsCenterPage() {
             <button
               type="button"
               onClick={markAllNotificationsRead}
-              className="bg-[#1C1C1E] text-white rounded-full h-11 sm:h-10 px-5 text-[14px] font-medium cursor-pointer"
+              className="bg-ink text-white rounded-full h-11 sm:h-10 px-5 text-[14px] font-medium cursor-pointer"
             >
               Mark all as read
             </button>
@@ -50,7 +50,7 @@ export default function NotificationsCenterPage() {
               aria-pressed={filter === tab.id}
               onClick={() => setFilter(tab.id)}
               className={`h-11 sm:h-10 px-4 rounded-full text-[14px] font-medium cursor-pointer ${
-                filter === tab.id ? 'bg-[#1C1C1E] text-white' : 'bg-[#F5F5F7] text-[#1C1C1E]'
+                filter === tab.id ? 'bg-ink text-white' : 'bg-haze text-ink'
               }`}
             >
               {tab.label}
@@ -60,7 +60,7 @@ export default function NotificationsCenterPage() {
 
         <InsetGroupedList>
           {filtered.length === 0 ? (
-            <div className="p-10 text-center text-[13px] text-[#636366]">
+            <div className="p-10 text-center text-[13px] text-muted">
               You&apos;re all caught up.
             </div>
           ) : (
@@ -76,18 +76,18 @@ export default function NotificationsCenterPage() {
                       n.read
                         ? 'bg-transparent'
                         : n.tone === 'critical'
-                        ? 'bg-[#FF453A]'
+                        ? 'bg-glow'
                         : n.tone === 'warning'
-                        ? 'bg-[#FF9F0A]'
-                        : 'bg-[#1C1C1E]'
+                        ? 'bg-azure'
+                        : 'bg-ink'
                     }`}
                   />
                   <div className="min-w-0">
-                    <p className={`text-[15px] text-[#1C1C1E] ${n.read ? 'font-normal' : 'font-semibold'}`}>
+                    <p className={`text-[15px] text-ink ${n.read ? 'font-normal' : 'font-semibold'}`}>
                       {n.title}
                     </p>
-                    <p className="text-[13px] text-[#636366] mt-0.5">{n.body}</p>
-                    <p className="text-[13px] text-[#8E8E93] mt-0.5">{n.timestamp}</p>
+                    <p className="text-[13px] text-muted mt-0.5">{n.body}</p>
+                    <p className="text-[13px] text-mist mt-0.5">{n.timestamp}</p>
                   </div>
                 </div>
 
@@ -95,7 +95,7 @@ export default function NotificationsCenterPage() {
                   {n.actionHref && (
                     <Link
                       href={n.actionHref}
-                      className="bg-[#1C1C1E] text-white rounded-full h-11 sm:h-10 px-5 text-[14px] font-medium inline-flex items-center"
+                      className="bg-ink text-white rounded-full h-11 sm:h-10 px-5 text-[14px] font-medium inline-flex items-center"
                     >
                       {n.actionLabel || 'Open'}
                     </Link>
@@ -103,7 +103,7 @@ export default function NotificationsCenterPage() {
                   <button
                     type="button"
                     onClick={() => dismissNotification(n.id)}
-                    className="bg-[#F5F5F7] text-[#1C1C1E] rounded-full h-11 sm:h-10 px-5 text-[14px] font-medium cursor-pointer"
+                    className="bg-haze text-ink rounded-full h-11 sm:h-10 px-5 text-[14px] font-medium cursor-pointer"
                   >
                     Dismiss
                   </button>

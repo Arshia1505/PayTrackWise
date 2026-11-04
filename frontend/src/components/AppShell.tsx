@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useFinShield } from '@/context/FinShieldContext';
 import { UniversalSheetModal } from '@/components/primitives';
+import { Logo } from '@/components/ui/Logo';
 import { formatINR } from '@/lib/finance-engine';
 import { readSession } from '@/lib/session';
 
@@ -38,7 +39,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const [moreOpen, setMoreOpen] = useState(false);
   const [allowed, setAllowed] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
   useEffect(() => setMoreOpen(false), [pathname]);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    const close = (event: MouseEvent | PointerEvent) => {
+      if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
+        setMoreOpen(false);
+      }
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMoreOpen(false);
+    };
+    document.addEventListener('pointerdown', close);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', close);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [moreOpen]);
 
   const isPublic =
     pathname === '/' ||
@@ -149,23 +169,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const moreActive = moreNav.some((i) => isActive(i.href));
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-[#1C1C1E]">
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl">
-        <div className="max-w-[1024px] mx-auto px-4 sm:px-8 h-14 flex items-center gap-6">
-          <Link href="/dashboard" className="text-[17px] font-semibold tracking-tight shrink-0">
-            FinShield
+    <div className="app-shell min-h-screen flex flex-col text-ink">
+      <header className="sticky top-0 z-40 px-3 pt-4 sm:px-6">
+        <div className="mx-auto flex max-w-[1024px] items-center gap-2 rounded-full border border-white/70 bg-white/70 py-1.5 pl-3 pr-1.5 shadow-[0_12px_40px_-18px_rgba(90,80,180,0.45)] backdrop-blur-xl">
+          <Link href="/dashboard" className="shrink-0 px-1" aria-label="FinShield home">
+            <Logo />
           </Link>
 
-          <nav aria-label="Primary" className="hidden md:flex items-center gap-1 flex-1">
+          <nav aria-label="Primary" className="hidden md:flex items-center gap-0.5 flex-1">
             {primaryNav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 aria-current={isActive(item.href) ? 'page' : undefined}
-                className={`px-3 h-9 inline-flex items-center rounded-full text-[14px] font-medium transition-colors ${
+                className={`px-3 h-9 inline-flex items-center rounded-full text-[13px] font-medium transition-colors ${
                   isActive(item.href)
-                    ? 'bg-[#F5F5F7] text-[#1C1C1E]'
-                    : 'text-[#636366] hover:text-[#1C1C1E]'
+                    ? 'bg-ink text-white'
+                    : 'text-muted hover:text-ink'
                 }`}
               >
                 {item.label}
@@ -174,15 +194,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
           <div className="flex-1 md:hidden" />
 
-          <div className="flex items-center gap-2">
-            <div className="relative">
+          <div className="flex items-center gap-1.5">
+            <div className="relative" ref={moreRef}>
               <button
                 type="button"
                 onClick={() => setMoreOpen((o) => !o)}
                 aria-expanded={moreOpen}
                 aria-haspopup="menu"
-                className={`h-9 px-3 rounded-full text-[14px] font-medium inline-flex items-center gap-1 ${
-                  moreActive ? 'bg-[#F5F5F7]' : 'text-[#636366] hover:text-[#1C1C1E]'
+                className={`h-9 px-3 rounded-full text-[13px] font-medium inline-flex items-center gap-1 ${
+                  moreActive ? 'bg-ink text-white' : 'text-muted hover:text-ink'
                 }`}
               >
                 More
@@ -191,15 +211,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {moreOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 mt-2 w-56 bg-white rounded-2xl p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)]"
+                  className="absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-peri bg-white p-1.5 shadow-[0_18px_40px_rgba(28,27,58,0.16)]"
                 >
                   {moreNav.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
                       role="menuitem"
-                      className={`block px-3 py-2.5 rounded-xl text-[14px] hover:bg-[#F5F5F7] ${
-                        isActive(item.href) ? 'font-semibold' : ''
+                      className={`block px-3 py-2.5 rounded-xl text-[14px] hover:bg-haze ${
+                        isActive(item.href) ? 'font-semibold text-ink' : 'text-muted'
                       }`}
                     >
                       {item.label}
@@ -216,18 +236,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   ? `Notifications, ${unreadNotifications} unread`
                   : 'Notifications'
               }
-              className="relative w-9 h-9 rounded-full bg-[#F5F5F7] hover:bg-[#EBEBED] flex items-center justify-center"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full bg-haze text-ink hover:bg-peri"
             >
               <span className="material-symbols-outlined text-[20px]">notifications</span>
               {unreadNotifications > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#FF453A]" />
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-glow" />
               )}
             </Link>
 
             <button
               type="button"
               onClick={() => setQuickEntryOpen(true)}
-              className="h-9 px-4 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium inline-flex items-center gap-1"
+              className="app-btn h-9 px-4 text-[13px] gap-1"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
               <span className="hidden sm:inline">Add</span>
@@ -238,15 +258,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <nav
           aria-label="Primary"
-          className="md:hidden flex gap-1 overflow-x-auto no-scrollbar px-4 pb-2"
+          className="md:hidden mx-auto mt-2 flex max-w-[1024px] gap-1 overflow-x-auto no-scrollbar px-1 pb-1"
         >
           {primaryNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               aria-current={isActive(item.href) ? 'page' : undefined}
-              className={`px-3 h-9 shrink-0 inline-flex items-center rounded-full text-[14px] font-medium ${
-                isActive(item.href) ? 'bg-[#F5F5F7]' : 'text-[#636366]'
+              className={`px-3 h-9 shrink-0 inline-flex items-center rounded-full text-[13px] font-medium ${
+                isActive(item.href) ? 'bg-ink text-white' : 'bg-white/70 text-muted'
               }`}
             >
               {item.label}
@@ -256,7 +276,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {syncingToast && (
-        <div role="status" className="fixed top-16 right-4 z-50 bg-[#1C1C1E] text-white px-4 py-2.5 rounded-full text-sm">
+        <div role="status" className="fixed top-16 right-4 z-50 rounded-full bg-ink px-4 py-2.5 text-sm text-white">
           {syncingToast}
         </div>
       )}
@@ -272,15 +292,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         maxWidth="max-w-md"
       >
         <form onSubmit={handleQuickCommit} className="space-y-4">
-          <div className="grid grid-cols-2 bg-[#F5F5F7] p-1 rounded-full">
+          <div className="grid grid-cols-2 bg-haze p-1 rounded-full">
             <button
               type="button"
               onClick={() => setEntryType('debit')}
               aria-pressed={entryType === 'debit'}
               className={`h-10 rounded-full text-[14px] font-medium cursor-pointer ${
                 entryType === 'debit'
-                  ? 'bg-[#1C1C1E] text-white'
-                  : 'text-[#636366] hover:text-[#1C1C1E]'
+                  ? 'bg-ink text-white'
+                  : 'text-muted hover:text-ink'
               }`}
             >
               Expense
@@ -291,17 +311,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               aria-pressed={entryType === 'credit'}
               className={`h-10 rounded-full text-[14px] font-medium cursor-pointer ${
                 entryType === 'credit'
-                  ? 'bg-[#1C1C1E] text-white'
-                  : 'text-[#636366] hover:text-[#1C1C1E]'
+                  ? 'bg-ink text-white'
+                  : 'text-muted hover:text-ink'
               }`}
             >
               Income
             </button>
           </div>
 
-          <div className="bg-[#F5F5F7] rounded-2xl p-4 text-center">
-            <span className="text-[13px] text-[#636366] block mb-1">Amount</span>
-            <div className="text-[32px] font-semibold tracking-tight text-[#1C1C1E] tabular-nums">
+          <div className="bg-haze rounded-2xl p-4 text-center">
+            <span className="text-[13px] text-muted block mb-1">Amount</span>
+            <div className="text-[32px] font-semibold tracking-tight text-ink tabular-nums">
               {entryType === 'debit' ? '−' : '+'}
               {formatINR(parseFloat(amountStr) || 0)}
             </div>
@@ -309,7 +329,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="quick-merchant" className="text-[13px] text-[#636366] block mb-1.5">
+              <label htmlFor="quick-merchant" className="text-[13px] text-muted block mb-1.5">
                 Merchant
               </label>
               <input
@@ -318,18 +338,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 value={merchant}
                 onChange={(e) => setMerchant(e.target.value)}
                 placeholder="e.g. Swiggy Instamart"
-                className="w-full h-11 px-4 rounded-2xl bg-[#F5F5F7] text-[14px] text-[#1C1C1E] focus:outline-none focus:ring-2 focus:ring-[#1C1C1E]"
+                className="w-full h-11 px-4 rounded-2xl bg-haze text-[14px] text-ink focus:outline-none focus:ring-2 focus:ring-ink"
               />
             </div>
             <div>
-              <label htmlFor="quick-category" className="text-[13px] text-[#636366] block mb-1.5">
+              <label htmlFor="quick-category" className="text-[13px] text-muted block mb-1.5">
                 Category
               </label>
               <select
                 id="quick-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full h-11 px-4 rounded-2xl bg-[#F5F5F7] text-[14px] text-[#1C1C1E] focus:outline-none focus:ring-2 focus:ring-[#1C1C1E]"
+                className="w-full h-11 px-4 rounded-2xl bg-haze text-[14px] text-ink focus:outline-none focus:ring-2 focus:ring-ink"
               >
                 {QUICK_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -349,8 +369,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 onClick={() => setPaymentMethod(rail)}
                 className={`flex-1 h-10 rounded-full text-[13px] font-medium cursor-pointer ${
                   paymentMethod === rail
-                    ? 'bg-[#1C1C1E] text-white'
-                    : 'bg-[#F5F5F7] text-[#636366]'
+                    ? 'bg-ink text-white'
+                    : 'bg-haze text-muted'
                 }`}
               >
                 {rail}
@@ -365,7 +385,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 aria-label={key === 'BACK' ? 'Backspace' : key}
                 onClick={() => handleKeypadPress(key)}
-                className="h-11 rounded-2xl bg-[#F5F5F7] hover:bg-[#EBEBED] active:scale-95 transition-all text-[16px] font-semibold text-[#1C1C1E] tabular-nums flex items-center justify-center cursor-pointer"
+                className="h-11 rounded-2xl bg-haze hover:bg-peri active:scale-95 transition-all text-[16px] font-semibold text-ink tabular-nums flex items-center justify-center cursor-pointer"
               >
                 {key === 'BACK' ? (
                   <span className="material-symbols-outlined text-[18px]">backspace</span>
@@ -383,13 +403,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 setQuickEntryOpen(false);
                 router.push('/ocr');
               }}
-              className="h-11 px-5 rounded-full bg-[#F5F5F7] hover:bg-[#EBEBED] text-[#1C1C1E] text-[14px] font-medium cursor-pointer"
+              className="h-11 px-5 rounded-full bg-haze hover:bg-peri text-ink text-[14px] font-medium cursor-pointer"
             >
               Scan a bill
             </button>
             <button
               type="submit"
-              className="flex-1 h-11 rounded-full bg-[#1C1C1E] hover:bg-[#2C2C2E] text-white text-[14px] font-medium cursor-pointer"
+              className="flex-1 h-11 rounded-full bg-ink hover:bg-ink-soft text-white text-[14px] font-medium cursor-pointer"
             >
               Save
             </button>

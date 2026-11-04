@@ -20,16 +20,16 @@ interface SplitMember {
 }
 
 const INPUT =
-  'w-full h-11 px-4 rounded-2xl bg-white text-[14px] text-[#1C1C1E] outline-none focus:ring-2 focus:ring-[#1C1C1E]';
-const LABEL = 'text-[13px] text-[#636366] block mb-1.5';
+  'w-full h-11 px-4 rounded-2xl bg-white text-[14px] text-ink outline-none focus:ring-2 focus:ring-ink';
+const LABEL = 'text-[13px] text-muted block mb-1.5';
 const PRIMARY_BTN =
-  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer';
+  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer';
 const SECONDARY_BTN =
-  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-[#F5F5F7] hover:bg-[#EBEBED] text-[#1C1C1E] text-[14px] font-medium cursor-pointer';
+  'inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-haze hover:bg-peri text-ink text-[14px] font-medium cursor-pointer';
 
 export default function UpiSplitAndCollectionsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-[14px] text-[#636366]">Loading…</div>}>
+    <Suspense fallback={<div className="p-8 text-[14px] text-muted">Loading…</div>}>
       <UpiSplitAndCollectionsContent />
     </Suspense>
   );
@@ -271,7 +271,7 @@ function UpiSplitAndCollectionsContent() {
                     aria-pressed={splitMode === 'equal'}
                     onClick={() => setSplitMode('equal')}
                     className={`h-9 px-4 rounded-full text-[13px] font-medium cursor-pointer ${
-                      splitMode === 'equal' ? 'bg-[#1C1C1E] text-white' : 'text-[#636366]'
+                      splitMode === 'equal' ? 'bg-ink text-white' : 'text-muted'
                     }`}
                   >
                     Equal
@@ -281,7 +281,7 @@ function UpiSplitAndCollectionsContent() {
                     aria-pressed={splitMode === 'exact'}
                     onClick={() => setSplitMode('exact')}
                     className={`h-9 px-4 rounded-full text-[13px] font-medium cursor-pointer ${
-                      splitMode === 'exact' ? 'bg-[#1C1C1E] text-white' : 'text-[#636366]'
+                      splitMode === 'exact' ? 'bg-ink text-white' : 'text-muted'
                     }`}
                   >
                     Custom amounts
@@ -292,10 +292,10 @@ function UpiSplitAndCollectionsContent() {
 
             <label className="flex items-center justify-between gap-4 pt-2 cursor-pointer">
               <div>
-                <div className="text-[14px] font-medium text-[#1C1C1E]">
+                <div className="text-[14px] font-medium text-ink">
                   Count only my share toward budget
                 </div>
-                <div className="text-[13px] text-[#636366]">
+                <div className="text-[13px] text-muted">
                   Your share: {formatINR(yourNetShare)} · Friends owe: {formatINR(totalFriendsShare)}
                 </div>
               </div>
@@ -303,7 +303,7 @@ function UpiSplitAndCollectionsContent() {
                 type="checkbox"
                 checked={budgetProtectionShield}
                 onChange={(e) => setBudgetProtectionShield(e.target.checked)}
-                className="w-5 h-5 accent-[#1C1C1E]"
+                className="w-5 h-5 accent-ink"
               />
             </label>
           </div>
@@ -311,7 +311,7 @@ function UpiSplitAndCollectionsContent() {
           <div className="bento-pod p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-[17px] font-semibold">People</h2>
-              <span className="text-[13px] text-[#636366]">
+              <span className="text-[13px] text-muted">
                 You + {selectedFriends.length} selected
               </span>
             </div>
@@ -338,11 +338,11 @@ function UpiSplitAndCollectionsContent() {
                         type="checkbox"
                         checked={m.selected}
                         onChange={() => handleToggleMember(m.id)}
-                        className="w-4 h-4 accent-[#1C1C1E]"
+                        className="w-4 h-4 accent-ink"
                       />
                       <div>
-                        <div className="text-[15px] font-medium text-[#1C1C1E]">{m.name}</div>
-                        <div className="text-[13px] text-[#636366]">{m.vpa}</div>
+                        <div className="text-[15px] font-medium text-ink">{m.name}</div>
+                        <div className="text-[13px] text-muted">{m.vpa}</div>
                       </div>
                     </label>
 
@@ -356,7 +356,7 @@ function UpiSplitAndCollectionsContent() {
                             onChange={(e) =>
                               handleCustomShareChange(m.id, Number(e.target.value))
                             }
-                            className="w-24 h-9 px-3 rounded-xl bg-[#F5F5F7] text-[14px] font-medium tabular-nums text-right"
+                            className="w-24 h-9 px-3 rounded-xl bg-haze text-[14px] font-medium tabular-nums text-right"
                           />
                         ) : (
                           <span className="text-[15px] font-semibold tabular-nums px-2">
@@ -369,8 +369,8 @@ function UpiSplitAndCollectionsContent() {
                           onClick={() => setActiveFriendPreviewId(m.id)}
                           className={`h-9 px-3 rounded-full text-[13px] font-medium cursor-pointer ${
                             activePreviewFriend?.id === m.id
-                              ? 'bg-[#1C1C1E] text-white'
-                              : 'bg-[#F5F5F7] text-[#1C1C1E]'
+                              ? 'bg-ink text-white'
+                              : 'bg-haze text-ink'
                           }`}
                         >
                           Show QR
@@ -380,7 +380,7 @@ function UpiSplitAndCollectionsContent() {
                           href={waUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="h-9 px-3 rounded-full bg-[#F5F5F7] text-[#1C1C1E] text-[13px] font-medium inline-flex items-center"
+                          className="h-9 px-3 rounded-full bg-haze text-ink text-[13px] font-medium inline-flex items-center"
                         >
                           WhatsApp
                         </a>
@@ -436,7 +436,7 @@ function UpiSplitAndCollectionsContent() {
         {/* Right: QR code */}
         <div className="lg:col-span-5 bento-pod p-6 space-y-5">
           <div>
-            <div className="text-[13px] text-[#636366]">Payment request for</div>
+            <div className="text-[13px] text-muted">Payment request for</div>
             <h2 className="text-[20px] font-semibold">
               {activePreviewFriend?.name || 'Friend'} · {formatINR(activePreviewShare)}
             </h2>
@@ -444,7 +444,7 @@ function UpiSplitAndCollectionsContent() {
 
           <div className="p-6 rounded-2xl bg-white flex flex-col items-center text-center space-y-3">
             <DynamicQrSvg value={upiUri} size={200} centerBadge="UPI" />
-            <div className="text-[13px] text-[#636366]">
+            <div className="text-[13px] text-muted">
               Pay to {receiverVpa}
             </div>
           </div>
@@ -453,9 +453,9 @@ function UpiSplitAndCollectionsContent() {
             {copiedUri ? 'Copied payment link' : 'Copy payment link'}
           </button>
 
-          <details className="text-[13px] text-[#636366]">
+          <details className="text-[13px] text-muted">
             <summary className="cursor-pointer select-none">Show payment link</summary>
-            <p className="mt-2 p-3 rounded-xl bg-white font-mono text-[12px] text-[#1C1C1E] break-all">
+            <p className="mt-2 p-3 rounded-xl bg-white font-mono text-[12px] text-ink break-all">
               {upiUri}
             </p>
           </details>
@@ -466,7 +466,7 @@ function UpiSplitAndCollectionsContent() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-[17px] font-semibold">People who owe you</h2>
-          <span className="text-[13px] text-[#636366] tabular-nums">
+          <span className="text-[13px] text-muted tabular-nums">
             {formatINR(outstanding)} outstanding
           </span>
         </div>
@@ -486,14 +486,14 @@ function UpiSplitAndCollectionsContent() {
                     <button
                       type="button"
                       onClick={() => sendCollectionReminder(col.id)}
-                      className="h-9 px-3 rounded-full bg-white text-[13px] font-medium text-[#1C1C1E] cursor-pointer"
+                      className="h-9 px-3 rounded-full bg-white text-[13px] font-medium text-ink cursor-pointer"
                     >
                       Remind
                     </button>
                     <button
                       type="button"
                       onClick={() => markCollectionSettled(col.id)}
-                      className="h-9 px-3 rounded-full bg-[#1C1C1E] text-white text-[13px] font-medium cursor-pointer"
+                      className="h-9 px-3 rounded-full bg-ink text-white text-[13px] font-medium cursor-pointer"
                     >
                       Mark paid
                     </button>

@@ -27,17 +27,17 @@ export function MetricPillPod({
     badgeTone === 'positive'
       ? 'bg-[#32D74B]/15 text-[#1E8E3E]'
       : badgeTone === 'warning'
-      ? 'bg-[#FF9F0A]/15 text-[#B25000]'
+      ? 'bg-azure/15 text-azure'
       : badgeTone === 'critical'
-      ? 'bg-[#FF453A]/15 text-[#D70015]'
-      : 'bg-white text-[#48484A] border border-black/[0.06]';
+      ? 'bg-glow/15 text-glow'
+      : 'bg-white text-ink-soft border border-lilac/40';
 
   return (
     <div
       className={`bento-pod p-5 flex flex-col justify-between ${className}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <span className="text-[13px] font-medium text-[#636366]">{label}</span>
+        <span className="text-[13px] font-medium text-muted">{label}</span>
         {badgeText && (
           <span
             className={`px-2.5 py-0.5 rounded-full text-[12px] font-medium ${badgeClasses}`}
@@ -48,10 +48,10 @@ export function MetricPillPod({
       </div>
 
       <div className="mt-3">
-        <div className="text-2xl sm:text-[28px] font-semibold tracking-[-0.02em] text-[#1C1C1E] tabular-nums">
+        <div className="text-2xl sm:text-[28px] font-semibold tracking-[-0.02em] text-ink tabular-nums">
           {value}
         </div>
-        {subtext && <p className="text-[13px] text-[#636366] mt-1">{subtext}</p>}
+        {subtext && <p className="text-[13px] text-muted mt-1">{subtext}</p>}
       </div>
     </div>
   );
@@ -84,14 +84,14 @@ export function MonochromeBarChart({
         const pct = Math.max(12, Math.round((bar.value / maxVal) * 100));
         const barColor =
           bar.tone === 'critical'
-            ? 'bg-[#FF453A]'
+            ? 'bg-glow'
             : bar.tone === 'warning'
-            ? 'bg-[#FF9F0A]'
+            ? 'bg-azure'
             : bar.tone === 'positive'
             ? 'bg-[#32D74B]'
             : bar.active
-            ? 'bg-[#1C1C1E]'
-            : 'bg-[#636366]/70 hover:bg-[#1C1C1E]';
+            ? 'bg-ink'
+            : 'bg-muted/70 hover:bg-ink';
 
         return (
           <div
@@ -102,14 +102,14 @@ export function MonochromeBarChart({
               <span
                 className={`text-[12px] font-medium block tabular-nums transition-opacity ${
                   bar.active
-                    ? 'opacity-100 text-[#1C1C1E]'
-                    : 'opacity-80 group-hover:opacity-100 text-[#636366]'
+                    ? 'opacity-100 text-ink'
+                    : 'opacity-80 group-hover:opacity-100 text-muted'
                 }`}
               >
                 {bar.formattedValue}
               </span>
               {bar.subValue && (
-                <span className="hidden sm:block text-[11px] text-[#8E8E93] tabular-nums">
+                <span className="hidden sm:block text-[11px] text-mist tabular-nums">
                   {bar.subValue}
                 </span>
               )}
@@ -124,7 +124,7 @@ export function MonochromeBarChart({
 
             <span
               className={`text-[12px] font-medium ${
-                bar.active ? 'text-[#1C1C1E]' : 'text-[#636366]'
+                bar.active ? 'text-ink' : 'text-muted'
               }`}
             >
               {bar.label}
@@ -157,12 +157,12 @@ export function SemiCircleArcGauge({
 
   const strokeColor =
     tone === 'critical'
-      ? '#FF453A'
+      ? '#e35fc9'
       : tone === 'warning'
-      ? '#FF9F0A'
+      ? '#3d86ff'
       : tone === 'positive'
       ? '#32D74B'
-      : '#1C1C1E';
+      : '#1c1b3a';
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -171,7 +171,7 @@ export function SemiCircleArcGauge({
           <path
             d="M 20 100 A 80 80 0 0 1 180 100"
             fill="none"
-            stroke="#E5E5EA"
+            stroke="#dde6fb"
             strokeWidth="16"
             strokeLinecap="round"
           />
@@ -186,13 +186,13 @@ export function SemiCircleArcGauge({
           />
         </svg>
         <div className="absolute bottom-1 text-center">
-          <div className="text-[24px] font-semibold text-[#1C1C1E] tabular-nums leading-none">
+          <div className="text-[24px] font-semibold text-ink tabular-nums leading-none">
             {centerLabel}
           </div>
         </div>
       </div>
       {subLabel && (
-        <span className="text-[13px] text-[#636366] mt-1 text-center tabular-nums">
+        <span className="text-[13px] text-muted mt-1 text-center tabular-nums">
           {subLabel}
         </span>
       )}
@@ -230,29 +230,29 @@ export function BentoProgressPod({
 
   const barColor =
     tone === 'critical'
-      ? 'bg-[#FF453A]'
+      ? 'bg-glow'
       : tone === 'warning'
-      ? 'bg-[#FF9F0A]'
+      ? 'bg-azure'
       : tone === 'positive'
-      ? 'bg-[#1C1C1E]'
-      : 'bg-[#1C1C1E]';
+      ? 'bg-ink'
+      : 'bg-ink';
 
   const badgeClass =
     tone === 'critical'
-      ? 'bg-[#FF453A]/15 text-[#D70015]'
+      ? 'bg-glow/15 text-glow'
       : tone === 'warning'
-      ? 'bg-[#FF9F0A]/15 text-[#B25000]'
+      ? 'bg-azure/15 text-azure'
       : tone === 'positive'
       ? 'bg-[#32D74B]/15 text-[#1E8E3E]'
-      : 'bg-white text-[#1C1C1E] border border-black/[0.06]';
+      : 'bg-white text-ink border border-lilac/40';
 
   return (
     <div className="bento-pod p-5 space-y-4">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-3">
           <div>
-            <h3 className="text-[15px] font-semibold text-[#1C1C1E]">{title}</h3>
-            {subtitle && <p className="text-[13px] text-[#636366]">{subtitle}</p>}
+            <h3 className="text-[15px] font-semibold text-ink">{title}</h3>
+            {subtitle && <p className="text-[13px] text-muted">{subtitle}</p>}
           </div>
         </div>
         {badgeText && (
@@ -264,12 +264,12 @@ export function BentoProgressPod({
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-[13px]">
-          <span className="font-bold text-[#1C1C1E] tabular-nums">{currentFormatted}</span>
-          <span className="text-[#8E8E93] tabular-nums">{targetFormatted}</span>
+          <span className="font-bold text-ink tabular-nums">{currentFormatted}</span>
+          <span className="text-mist tabular-nums">{targetFormatted}</span>
         </div>
 
         {/* Progress Bar with 80% Pacing Tick */}
-        <div className="relative h-2 w-full rounded-full bg-[#E5E5EA] overflow-hidden">
+        <div className="relative h-2 w-full rounded-full bg-peri overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-300 ${barColor}`}
             style={{ width: `${safePct}%` }}
@@ -283,9 +283,9 @@ export function BentoProgressPod({
       </div>
 
       {(footerLeft || footerRight) && (
-        <div className="flex items-center justify-between text-[11px] text-[#48484A] pt-1">
+        <div className="flex items-center justify-between text-[11px] text-ink-soft pt-1">
           <span>{footerLeft}</span>
-          <span className="font-semibold text-[#1C1C1E]">{footerRight}</span>
+          <span className="font-semibold text-ink">{footerRight}</span>
         </div>
       )}
     </div>
@@ -302,7 +302,7 @@ export function InsetGroupedList({
 }) {
   return (
     <div
-      className={`bento-pod overflow-hidden divide-y divide-black/[0.06] ${className}`}
+      className={`bento-pod overflow-hidden divide-y divide-lilac/40 ${className}`}
     >
       {children}
     </div>
@@ -352,14 +352,14 @@ export function UniversalSheetModal({
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-[19px] font-semibold text-[#1C1C1E]">{title}</h2>
-            {subtitle && <p className="text-xs text-[#8E8E93]">{subtitle}</p>}
+            <h2 className="text-[19px] font-semibold text-ink">{title}</h2>
+            {subtitle && <p className="text-xs text-mist">{subtitle}</p>}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-[#EBEBED] flex items-center justify-center text-[#1C1C1E] cursor-pointer"
+            className="w-8 h-8 rounded-full bg-haze hover:bg-peri flex items-center justify-center text-ink cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
@@ -403,13 +403,13 @@ export function DynamicQrSvg({
                 y={rIdx}
                 width={1}
                 height={1}
-                fill="#1C1C1E"
+                fill="#1c1b3a"
               />
             ) : null
           )
         )}
       </svg>
-      <div className="absolute px-1.5 py-0.5 rounded bg-[#1C1C1E] text-white text-[9px] font-semibold tracking-wider border border-white">
+      <div className="absolute px-1.5 py-0.5 rounded bg-ink text-white text-[9px] font-semibold tracking-wider border border-white">
         {badgeLabel}
       </div>
     </div>
@@ -430,8 +430,10 @@ export function PageHeader({
   return (
     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
       <div className="min-w-0">
-        <h1 className="text-[32px] leading-[38px] font-semibold tracking-[-0.02em]">{title}</h1>
-        {description && <p className="text-[15px] text-[#636366] mt-1">{description}</p>}
+        <h1 className="font-display text-[clamp(2rem,4vw,2.6rem)] font-light leading-none tracking-[-0.035em] text-ink">
+          {title}
+        </h1>
+        {description && <p className="mt-2 text-[15px] text-muted">{description}</p>}
       </div>
       {action && <div className="flex items-center gap-2 shrink-0">{action}</div>}
     </div>

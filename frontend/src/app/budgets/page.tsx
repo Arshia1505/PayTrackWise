@@ -36,29 +36,29 @@ export default function BudgetsPage() {
 
       <div className="space-y-6">
         <section className="bento-pod p-6">
-          <p className="text-[13px] text-[#636366]">
+          <p className="text-[13px] text-muted">
             {remaining >= 0 ? 'Left this month' : 'Over budget this month'}
           </p>
           <p
             className={`text-[40px] leading-[46px] font-semibold tracking-[-0.02em] tabular-nums mt-1 ${
-              remaining < 0 ? 'text-[#D70015]' : 'text-[#1C1C1E]'
+              remaining < 0 ? 'text-glow' : 'text-ink'
             }`}
           >
             {formatINR(Math.abs(remaining))}
           </p>
-          <div className="h-2 w-full rounded-full bg-[#E5E5EA] overflow-hidden mt-5">
+          <div className="h-2 w-full rounded-full bg-peri overflow-hidden mt-5">
             <div
-              className={`h-full rounded-full ${remaining < 0 ? 'bg-[#FF453A]' : 'bg-[#1C1C1E]'}`}
+              className={`h-full rounded-full ${remaining < 0 ? 'bg-glow' : 'bg-ink'}`}
               style={{ width: `${pctSpent}%` }}
             />
           </div>
-          <p className="text-[13px] text-[#636366] mt-2 tabular-nums">
+          <p className="text-[13px] text-muted mt-2 tabular-nums">
             {formatINR(totalSpent)} spent of {formatINR(totalCap)}
           </p>
         </section>
 
         {state.budgets.length === 0 ? (
-          <div className="bento-pod p-10 text-center text-[15px] text-[#636366]">
+          <div className="bento-pod p-10 text-center text-[15px] text-muted">
             No budgets yet.
           </div>
         ) : (
@@ -75,20 +75,20 @@ export default function BudgetsPage() {
                   className="bento-pod p-5 text-left space-y-4 cursor-pointer hover:bg-[#EFEFF2] transition-colors min-h-[44px]"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-[15px] font-medium text-[#1C1C1E]">{b.category}</h3>
+                    <h3 className="text-[15px] font-medium text-ink">{b.category}</h3>
                     {over && (
-                      <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[#FF453A]/15 text-[#D70015] whitespace-nowrap">
+                      <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-glow/15 text-glow whitespace-nowrap">
                         Over by {formatINR(b.spent - b.cap)}
                       </span>
                     )}
                   </div>
-                  <div className="h-2 w-full rounded-full bg-[#E5E5EA] overflow-hidden">
+                  <div className="h-2 w-full rounded-full bg-peri overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${over ? 'bg-[#FF453A]' : 'bg-[#1C1C1E]'}`}
+                      className={`h-full rounded-full ${over ? 'bg-glow' : 'bg-ink'}`}
                       style={{ width: `${Math.min(100, pct)}%` }}
                     />
                   </div>
-                  <p className="text-[13px] text-[#636366] tabular-nums">
+                  <p className="text-[13px] text-muted tabular-nums">
                     {formatINR(b.spent)} of {formatINR(b.cap)}
                   </p>
                 </button>
@@ -106,12 +106,12 @@ export default function BudgetsPage() {
       >
         {editingBudget && (
           <form onSubmit={saveCapEdit} className="space-y-4">
-            <p className="text-[13px] text-[#636366] tabular-nums">
+            <p className="text-[13px] text-muted tabular-nums">
               Spent so far: {formatINR(editingBudget.spent)}
             </p>
 
             <div>
-              <label htmlFor="cap-input" className="text-[13px] text-[#636366] block mb-1.5">
+              <label htmlFor="cap-input" className="text-[13px] text-muted block mb-1.5">
                 Monthly limit (₹)
               </label>
               <input
@@ -120,7 +120,7 @@ export default function BudgetsPage() {
                 inputMode="numeric"
                 value={newCapValue}
                 onChange={(e) => setNewCapValue(e.target.value)}
-                className="w-full h-12 px-4 rounded-2xl bg-[#F5F5F7] text-[17px] tabular-nums text-[#1C1C1E] focus:outline-none focus:ring-2 focus:ring-[#1C1C1E]"
+                className="w-full h-12 px-4 rounded-2xl bg-haze text-[17px] tabular-nums text-ink focus:outline-none focus:ring-2 focus:ring-ink"
               />
             </div>
 
@@ -130,7 +130,7 @@ export default function BudgetsPage() {
                   key={preset}
                   type="button"
                   onClick={() => setNewCapValue(String(preset))}
-                  className="h-11 rounded-full bg-[#F5F5F7] hover:bg-[#EBEBED] text-[13px] font-medium tabular-nums text-[#1C1C1E] cursor-pointer"
+                  className="h-11 rounded-full bg-haze hover:bg-peri text-[13px] font-medium tabular-nums text-ink cursor-pointer"
                 >
                   {formatINR(preset, { compact: true })}
                 </button>
@@ -139,7 +139,7 @@ export default function BudgetsPage() {
 
             <button
               type="submit"
-              className="w-full h-11 sm:h-10 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer"
+              className="w-full h-11 sm:h-10 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer"
             >
               Save limit
             </button>

@@ -41,7 +41,7 @@ export function Hero() {
   );
 
   return (
-    <section id="top" ref={ref} className="relative h-[230vh]">
+    <section id="top" ref={ref} className="relative h-[230svh]">
       <div className="sticky top-0 h-[100svh] overflow-hidden">
         <VideoScrubber progressRef={progress} />
         <div

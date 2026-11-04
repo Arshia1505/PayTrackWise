@@ -39,10 +39,10 @@ function Slider({
   return (
     <div>
       <div className="flex justify-between gap-3 mb-2 text-[13px]">
-        <label htmlFor={id} className="text-[#636366]">
+        <label htmlFor={id} className="text-muted">
           {label}
         </label>
-        <span className="font-medium text-[#1C1C1E] tabular-nums">{display}</span>
+        <span className="font-medium text-ink tabular-nums">{display}</span>
       </div>
       <input
         id={id}
@@ -52,7 +52,7 @@ function Slider({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-6 accent-[#1C1C1E]"
+        className="w-full h-6 accent-ink"
       />
     </div>
   );
@@ -60,11 +60,11 @@ function Slider({
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: 'positive' }) {
   return (
-    <div className="bg-[#F5F5F7] rounded-[16px] p-4">
-      <div className="text-[13px] text-[#636366]">{label}</div>
+    <div className="bg-haze rounded-[16px] p-4">
+      <div className="text-[13px] text-muted">{label}</div>
       <div
         className={`text-[17px] font-semibold tabular-nums mt-1 ${
-          tone === 'positive' ? 'text-[#1E8E3E]' : 'text-[#1C1C1E]'
+          tone === 'positive' ? 'text-[#1E8E3E]' : 'text-ink'
         }`}
       >
         {value}
@@ -105,7 +105,7 @@ export default function FinancialCalculatorsPage() {
       <div
         role="tablist"
         aria-label="Calculator type"
-        className="inline-flex bg-[#F5F5F7] p-1 rounded-full mb-6 max-w-full"
+        className="inline-flex bg-haze p-1 rounded-full mb-6 max-w-full"
       >
         {TABS.map((t) => (
           <button
@@ -115,7 +115,7 @@ export default function FinancialCalculatorsPage() {
             aria-selected={calcMode === t.id}
             onClick={() => setCalcMode(t.id)}
             className={`h-10 px-5 rounded-full text-[14px] font-medium cursor-pointer transition-colors ${
-              calcMode === t.id ? 'bg-[#1C1C1E] text-white' : 'text-[#636366] hover:text-[#1C1C1E]'
+              calcMode === t.id ? 'bg-ink text-white' : 'text-muted hover:text-ink'
             }`}
           >
             {t.label}
@@ -210,7 +210,7 @@ export default function FinancialCalculatorsPage() {
           {calcMode === 'sip' ? (
             <>
               <div>
-                <div className="text-[13px] text-[#636366]">Value after {sipYears} years</div>
+                <div className="text-[13px] text-muted">Value after {sipYears} years</div>
                 <div className="text-[34px] sm:text-[40px] font-semibold tracking-[-0.02em] tabular-nums break-words">
                   {formatINR(sipResult.futureValue)}
                 </div>
@@ -223,12 +223,12 @@ export default function FinancialCalculatorsPage() {
           ) : (
             <>
               <div>
-                <div className="text-[13px] text-[#636366]">
+                <div className="text-[13px] text-muted">
                   {calcMode === 'prepayment' ? 'Monthly EMI' : 'Monthly payment (EMI)'}
                 </div>
                 <div className="text-[34px] sm:text-[40px] font-semibold tracking-[-0.02em] tabular-nums break-words">
                   {formatINR(emiResult.monthlyEMI)}
-                  <span className="text-[15px] font-normal text-[#636366]"> / month</span>
+                  <span className="text-[15px] font-normal text-muted"> / month</span>
                 </div>
               </div>
 
@@ -237,7 +237,7 @@ export default function FinancialCalculatorsPage() {
                   <div className="text-[15px] font-semibold text-[#1E8E3E]">
                     You finish {prepayResult.monthsSaved} months sooner
                   </div>
-                  <p className="text-[13px] text-[#1C1C1E] mt-1 tabular-nums">
+                  <p className="text-[13px] text-ink mt-1 tabular-nums">
                     Saves {formatINR(prepayResult.interestSaved)} in interest. New term:{' '}
                     {prepayResult.revisedMonths} months.
                   </p>
@@ -254,7 +254,7 @@ export default function FinancialCalculatorsPage() {
                 <h2 className="text-[15px] font-semibold mb-2">Year by year</h2>
                 <div className="overflow-x-auto -mx-1 px-1">
                   <table className="w-full text-left text-[13px] tabular-nums min-w-[320px]">
-                    <thead className="text-[#636366]">
+                    <thead className="text-muted">
                       <tr>
                         <th className="py-2 pr-2 font-medium">Year</th>
                         <th className="py-2 px-2 font-medium text-right">Principal</th>
@@ -262,12 +262,12 @@ export default function FinancialCalculatorsPage() {
                         <th className="py-2 pl-2 font-medium text-right">Balance</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-black/[0.06]">
+                    <tbody className="divide-y divide-lilac/40">
                       {emiResult.yearlySchedule.map((row) => (
                         <tr key={row.year}>
                           <td className="py-2 pr-2">{row.year}</td>
                           <td className="py-2 px-2 text-right">{formatINR(row.principalPaid)}</td>
-                          <td className="py-2 px-2 text-right text-[#636366]">{formatINR(row.interestPaid)}</td>
+                          <td className="py-2 px-2 text-right text-muted">{formatINR(row.interestPaid)}</td>
                           <td className="py-2 pl-2 text-right">{formatINR(row.closingBalance)}</td>
                         </tr>
                       ))}

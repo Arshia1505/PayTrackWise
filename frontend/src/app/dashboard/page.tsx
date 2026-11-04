@@ -11,9 +11,9 @@ import {
 } from '@/components/primitives';
 import { formatINR } from '@/lib/finance-engine';
 
-const LABEL = 'text-[13px] text-[#636366]';
+const LABEL = 'text-[13px] text-muted';
 const LINK =
-  'text-[13px] font-medium text-[#1C1C1E] hover:underline inline-flex items-center min-h-[44px]';
+  'text-[13px] font-medium text-ink hover:underline inline-flex items-center min-h-[44px]';
 
 export default function HomeInsightsPage() {
   const { state, setQuickEntryOpen } = useFinShield();
@@ -56,7 +56,7 @@ export default function HomeInsightsPage() {
           <button
             type="button"
             onClick={() => setQuickEntryOpen(true)}
-            className="bg-[#1C1C1E] text-white rounded-full h-11 sm:h-10 px-5 text-[14px] font-medium cursor-pointer"
+            className="app-btn h-11 sm:h-10 px-5 text-[14px] cursor-pointer"
           >
             Log expense
           </button>
@@ -66,7 +66,7 @@ export default function HomeInsightsPage() {
       <div className="space-y-6">
         <section className="bento-pod p-6">
           <p className={LABEL}>Net cash</p>
-          <p className="text-[44px] sm:text-[56px] leading-none font-semibold tracking-[-0.03em] text-[#1C1C1E] tabular-nums mt-2">
+          <p className="mt-2 font-display text-[44px] sm:text-[56px] leading-none font-light tracking-[-0.035em] text-ink tabular-nums">
             {formatINR(netBalance, { compact: state.settings.compactLakhs })}
           </p>
           <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
@@ -130,7 +130,7 @@ export default function HomeInsightsPage() {
                           <span className="font-medium">{b.category}</span>
                           <span
                             className={`tabular-nums ${
-                              over ? 'text-[#D70015] font-medium' : 'text-[#636366]'
+                              over ? 'text-glow font-medium' : 'text-muted'
                             }`}
                           >
                             {over ? 'Over · ' : ''}
@@ -140,7 +140,7 @@ export default function HomeInsightsPage() {
                         <div className="h-1.5 w-full rounded-full bg-white overflow-hidden">
                           <div
                             className={`h-full rounded-full ${
-                              over ? 'bg-[#FF453A]' : 'bg-[#1C1C1E]'
+                              over ? 'bg-glow' : 'bg-ink'
                             }`}
                             style={{ width: `${pct}%` }}
                           />
@@ -176,7 +176,7 @@ export default function HomeInsightsPage() {
                   </div>
                   <p
                     className={`text-[15px] font-medium tabular-nums shrink-0 ${
-                      tx.type === 'credit' ? 'text-[#1E8E3E]' : 'text-[#1C1C1E]'
+                      tx.type === 'credit' ? 'text-[#1E8E3E]' : 'text-ink'
                     }`}
                   >
                     {tx.type === 'credit' ? '+' : '−'}

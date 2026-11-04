@@ -16,8 +16,8 @@ interface OcrLineItem {
 }
 
 const INPUT =
-  'w-full h-11 px-4 rounded-2xl bg-white text-[14px] text-[#1C1C1E] outline-none focus:ring-2 focus:ring-[#1C1C1E]';
-const LABEL = 'text-[13px] text-[#636366] block mb-1.5';
+  'w-full h-11 px-4 rounded-2xl bg-white text-[14px] text-ink outline-none focus:ring-2 focus:ring-ink';
+const LABEL = 'text-[13px] text-muted block mb-1.5';
 
 export default function OcrBillScannerPage() {
   const router = useRouter();
@@ -150,7 +150,7 @@ export default function OcrBillScannerPage() {
         title="Scan a bill"
         description="Upload a photo of a receipt or bill to review items before saving."
         action={
-          <label className="inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer">
+          <label className="inline-flex items-center justify-center h-11 sm:h-10 px-5 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer">
             <span>Upload receipt</span>
             <input
               type="file"
@@ -164,7 +164,7 @@ export default function OcrBillScannerPage() {
 
       <div className="space-y-6">
         {scanNote && (
-          <p role="status" className="text-[14px] text-[#636366]">
+          <p role="status" className="text-[14px] text-muted">
             {scanNote}
           </p>
         )}
@@ -192,47 +192,47 @@ export default function OcrBillScannerPage() {
 
             <div className="bg-white rounded-2xl p-5 space-y-4 relative">
               {previewUrl && previewKind === 'image' && (
-                <img src={previewUrl} alt="Uploaded bill" className="w-full max-h-80 object-contain rounded-xl bg-[#F5F5F7]" />
+                <img src={previewUrl} alt="Uploaded bill" className="w-full max-h-80 object-contain rounded-xl bg-haze" />
               )}
               {previewUrl && previewKind === 'pdf' && (
-                <iframe title="Uploaded bill" src={previewUrl} className="w-full h-80 rounded-xl bg-[#F5F5F7]" />
+                <iframe title="Uploaded bill" src={previewUrl} className="w-full h-80 rounded-xl bg-haze" />
               )}
               {!previewUrl && (
-                <p className="text-[14px] text-[#636366]">Upload a photo or PDF to see the bill here.</p>
+                <p className="text-[14px] text-muted">Upload a photo or PDF to see the bill here.</p>
               )}
               {readText && (
-                <pre className="max-h-48 overflow-auto whitespace-pre-wrap text-[12px] leading-5 text-[#1C1C1E] bg-[#F5F5F7] rounded-xl p-3">
+                <pre className="max-h-48 overflow-auto whitespace-pre-wrap text-[12px] leading-5 text-ink bg-haze rounded-xl p-3">
                   {readText}
                 </pre>
               )}
               {scanning && (
                 <div className="absolute inset-0 bg-white/85 rounded-2xl flex items-center justify-center z-10">
-                  <span className="text-[14px] font-medium text-[#1C1C1E]">Reading receipt…</span>
+                  <span className="text-[14px] font-medium text-ink">Reading receipt…</span>
                 </div>
               )}
 
               <div>
-                <p className="text-[16px] font-semibold text-[#1C1C1E]">{merchant}</p>
-                <p className="text-[13px] text-[#636366]">
+                <p className="text-[16px] font-semibold text-ink">{merchant}</p>
+                <p className="text-[13px] text-muted">
                   {billDate} · {invoiceNumber}
                 </p>
               </div>
 
-              <div className="divide-y divide-black/[0.06]">
+              <div className="divide-y divide-lilac/40">
                 {items.map((item) => (
                   <div key={item.id} className="py-2.5 flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-[14px] text-[#1C1C1E]">
+                      <p className="text-[14px] text-ink">
                         {item.qty > 1 ? `${item.qty} × ` : ''}
                         {item.description}
                       </p>
                       {item.confidence < 70 && (
-                        <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#FF9F0A]/15 text-[#B25000]">
+                        <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-azure/15 text-azure">
                           Please check amount
                         </span>
                       )}
                     </div>
-                    <span className="text-[14px] font-medium text-[#1C1C1E] tabular-nums shrink-0">
+                    <span className="text-[14px] font-medium text-ink tabular-nums shrink-0">
                       {formatINR(item.amount)}
                     </span>
                   </div>
@@ -240,15 +240,15 @@ export default function OcrBillScannerPage() {
               </div>
 
               <div className="pt-3 border-t border-black/[0.08] space-y-1.5 text-[14px]">
-                <div className="flex justify-between text-[#636366] tabular-nums">
+                <div className="flex justify-between text-muted tabular-nums">
                   <span>Subtotal</span>
                   <span>{formatINR(subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-[#636366] tabular-nums">
+                <div className="flex justify-between text-muted tabular-nums">
                   <span>Tax</span>
                   <span>{formatINR(taxAmount)}</span>
                 </div>
-                <div className="flex justify-between text-[17px] font-semibold text-[#1C1C1E] pt-1 tabular-nums">
+                <div className="flex justify-between text-[17px] font-semibold text-ink pt-1 tabular-nums">
                   <span>Total</span>
                   <span>{formatINR(grandTotal)}</span>
                 </div>
@@ -321,7 +321,7 @@ export default function OcrBillScannerPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] text-[#636366]">Items</span>
+                <span className="text-[13px] text-muted">Items</span>
                 <button
                   type="button"
                   onClick={() =>
@@ -336,13 +336,13 @@ export default function OcrBillScannerPage() {
                       },
                     ])
                   }
-                  className="text-[13px] font-medium text-[#1C1C1E] underline cursor-pointer min-h-[44px] inline-flex items-center"
+                  className="text-[13px] font-medium text-ink underline cursor-pointer min-h-[44px] inline-flex items-center"
                 >
                   Add item
                 </button>
               </div>
 
-              <div className="bg-white rounded-2xl divide-y divide-black/[0.06]">
+              <div className="bg-white rounded-2xl divide-y divide-lilac/40">
                 {items.map((item, idx) => (
                   <div key={item.id} className="p-3 flex items-center gap-3">
                     <input
@@ -350,10 +350,10 @@ export default function OcrBillScannerPage() {
                       aria-label={`Item ${idx + 1} description`}
                       value={item.description}
                       onChange={(e) => updateLineItem(item.id, 'description', e.target.value)}
-                      className="flex-1 h-10 px-2 text-[14px] text-[#1C1C1E] bg-transparent focus:outline-none"
+                      className="flex-1 h-10 px-2 text-[14px] text-ink bg-transparent focus:outline-none"
                     />
                     {item.confidence < 70 && (
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#FF9F0A]/15 text-[#B25000] shrink-0">
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-azure/15 text-azure shrink-0">
                         Check
                       </span>
                     )}
@@ -363,7 +363,7 @@ export default function OcrBillScannerPage() {
                       aria-label={`Item ${idx + 1} amount in rupees`}
                       value={item.amount}
                       onChange={(e) => updateLineItem(item.id, 'amount', e.target.value)}
-                      className="w-28 h-10 text-right tabular-nums text-[14px] font-medium text-[#1C1C1E] bg-[#F5F5F7] px-3 rounded-xl"
+                      className="w-28 h-10 text-right tabular-nums text-[14px] font-medium text-ink bg-haze px-3 rounded-xl"
                     />
                   </div>
                 ))}
@@ -372,8 +372,8 @@ export default function OcrBillScannerPage() {
 
             <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <span className="text-[13px] text-[#636366] block">Total</span>
-                <span className="text-[28px] font-semibold text-[#1C1C1E] tabular-nums">
+                <span className="text-[13px] text-muted block">Total</span>
+                <span className="text-[28px] font-semibold text-ink tabular-nums">
                   {formatINR(grandTotal)}
                 </span>
               </div>
@@ -382,14 +382,14 @@ export default function OcrBillScannerPage() {
                 <button
                   type="button"
                   onClick={handleRouteToSplit}
-                  className="h-11 sm:h-10 px-5 rounded-full bg-white hover:bg-[#EBEBED] text-[#1C1C1E] text-[14px] font-medium cursor-pointer"
+                  className="h-11 sm:h-10 px-5 rounded-full bg-white hover:bg-peri text-ink text-[14px] font-medium cursor-pointer"
                 >
                   Split this bill
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirmSave}
-                  className="h-11 sm:h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer"
+                  className="h-11 sm:h-10 px-5 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer"
                 >
                   Save transaction
                 </button>

@@ -39,7 +39,7 @@ export default function UnusualSpendingPage() {
             type="button"
             onClick={runCheck}
             disabled={runningAudit}
-            className="h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer disabled:opacity-60"
+            className="h-10 px-5 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer disabled:opacity-60"
           >
             {runningAudit ? 'Checking…' : 'Check again'}
           </button>
@@ -47,14 +47,14 @@ export default function UnusualSpendingPage() {
       />
 
       {auditOutput && (
-        <div role="status" className="mb-6 p-4 rounded-[16px] bg-[#F5F5F7] text-[14px] text-[#1C1C1E]">
+        <div role="status" className="mb-6 p-4 rounded-[16px] bg-haze text-[14px] text-ink">
           {auditOutput}
         </div>
       )}
 
       <div className="bento-pod p-5 sm:p-6 mb-6">
         <div className="flex items-baseline justify-between gap-3 mb-2">
-          <label htmlFor="sensitivity" className="text-[13px] text-[#636366]">
+          <label htmlFor="sensitivity" className="text-[13px] text-muted">
             Sensitivity
           </label>
           <span className="text-[13px] font-medium tabular-nums">
@@ -69,9 +69,9 @@ export default function UnusualSpendingPage() {
           step={0.1}
           value={sensitivitySigma}
           onChange={(e) => setSensitivitySigma(Number(e.target.value))}
-          className="w-full h-6 accent-[#1C1C1E]"
+          className="w-full h-6 accent-ink"
         />
-        <div className="flex justify-between text-[13px] text-[#636366] mt-1">
+        <div className="flex justify-between text-[13px] text-muted mt-1">
           <span>More alerts</span>
           <span>Fewer alerts</span>
         </div>
@@ -80,7 +80,7 @@ export default function UnusualSpendingPage() {
       <h2 className="text-[17px] font-semibold mb-3">Flagged transactions</h2>
       <InsetGroupedList>
         {flaggedTransactions.length === 0 ? (
-          <div className="p-8 text-center text-[14px] text-[#636366]">
+          <div className="p-8 text-center text-[14px] text-muted">
             Nothing unusual at this sensitivity.
           </div>
         ) : (
@@ -88,7 +88,7 @@ export default function UnusualSpendingPage() {
             <div key={tx.id} className="px-5 py-4 flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <div className="text-[15px] font-medium truncate">{tx.merchant}</div>
-                <p className="text-[13px] text-[#636366] truncate">
+                <p className="text-[13px] text-muted truncate">
                   {tx.category} · {tx.date}
                   {tx.paymentMethod ? ` · ${tx.paymentMethod}` : ''}
                 </p>

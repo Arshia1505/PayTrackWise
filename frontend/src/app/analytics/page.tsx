@@ -5,7 +5,7 @@ import { useFinShield } from '@/context/FinShieldContext';
 import { MonochromeBarChart, InsetGroupedList, PageHeader } from '@/components/primitives';
 import { formatINR } from '@/lib/finance-engine';
 
-const LABEL = 'text-[13px] text-[#636366]';
+const LABEL = 'text-[13px] text-muted';
 
 export default function SpendingAnalyticsPage() {
   const { state } = useFinShield();
@@ -61,13 +61,13 @@ export default function SpendingAnalyticsPage() {
                 <div key={b.id} className="px-5 py-4 flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-[15px] font-medium">{b.category}</p>
-                    <p className={`${LABEL} ${over ? '!text-[#D70015]' : ''}`}>
+                    <p className={`${LABEL} ${over ? '!text-glow' : ''}`}>
                       {over ? 'Over budget' : `${pct}% used`}
                     </p>
                   </div>
                   <p className="text-[15px] font-medium tabular-nums shrink-0">
                     {formatINR(b.spent)}{' '}
-                    <span className="text-[13px] font-normal text-[#636366]">/ {formatINR(b.cap)}</span>
+                    <span className="text-[13px] font-normal text-muted">/ {formatINR(b.cap)}</span>
                   </p>
                 </div>
               );

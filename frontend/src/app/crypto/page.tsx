@@ -15,12 +15,12 @@ import {
 } from '@/lib/finance-engine';
 
 const inputCls =
-  'w-full h-11 px-4 rounded-[16px] bg-white text-[14px] text-[#1C1C1E] placeholder:text-[#8E8E93] outline-none focus:ring-2 focus:ring-[#1C1C1E]/20';
-const labelCls = 'text-[13px] text-[#636366] block mb-1.5';
+  'w-full h-11 px-4 rounded-[16px] bg-white text-[14px] text-ink placeholder:text-mist outline-none focus:ring-2 focus:ring-ink/20';
+const labelCls = 'text-[13px] text-muted block mb-1.5';
 const primaryBtn =
-  'inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#1C1C1E] text-white text-[14px] font-medium cursor-pointer disabled:opacity-40';
+  'inline-flex items-center justify-center h-10 px-5 rounded-full bg-ink text-white text-[14px] font-medium cursor-pointer disabled:opacity-40';
 const secondaryBtn =
-  'inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#F5F5F7] text-[#1C1C1E] text-[14px] font-medium cursor-pointer hover:bg-[#EBEBED]';
+  'inline-flex items-center justify-center h-10 px-5 rounded-full bg-haze text-ink text-[14px] font-medium cursor-pointer hover:bg-peri';
 
 function shortAddress(address: string) {
   if (address.length < 12) return address;
@@ -190,7 +190,7 @@ export default function CryptoPage() {
         <section className="bento-pod p-5 sm:p-6 space-y-5 min-w-0">
           <div>
             <h2 className="text-[17px] font-semibold">Your address</h2>
-            <p className="text-[13px] text-[#636366] mt-1">
+            <p className="text-[13px] text-muted mt-1">
               This is where people pay you. Leave the wallet blank and one is created from your id.
             </p>
           </div>
@@ -217,14 +217,14 @@ export default function CryptoPage() {
                 className={`${inputCls} font-mono text-[13px]`}
               />
             </div>
-            {profileError && <p className="text-[13px] text-[#D70015]">{profileError}</p>}
+            {profileError && <p className="text-[13px] text-glow">{profileError}</p>}
             <button type="submit" className={primaryBtn}>Save address</button>
           </form>
           {receiveUri && (
             <div className="bg-white p-5 rounded-[22px] flex flex-col items-center text-center">
               <DynamicQrSvg value={receiveUri} size={180} badgeLabel={selectedSymbol} />
               <p className="mt-3 text-[14px] font-medium">{profile.cryptHandle}</p>
-              <p className="text-[12px] text-[#636366] font-mono break-all">{profile.solanaWallet}</p>
+              <p className="text-[12px] text-muted font-mono break-all">{profile.solanaWallet}</p>
             </div>
           )}
         </section>
@@ -232,7 +232,7 @@ export default function CryptoPage() {
         <section className="bento-pod p-5 sm:p-6 space-y-5 min-w-0">
           <div>
             <h2 className="text-[17px] font-semibold">Send</h2>
-            <p className="text-[13px] text-[#636366] mt-1">
+            <p className="text-[13px] text-muted mt-1">
               Pay a saved contact, an id, or a wallet address.
             </p>
           </div>
@@ -250,7 +250,7 @@ export default function CryptoPage() {
                       aria-pressed={active}
                       onClick={() => setPayTo(contact.handle)}
                       className={`h-10 px-4 rounded-full text-[13px] font-medium cursor-pointer ${
-                        active ? 'bg-[#1C1C1E] text-white' : 'bg-white text-[#1C1C1E] hover:bg-[#EBEBED]'
+                        active ? 'bg-ink text-white' : 'bg-white text-ink hover:bg-peri'
                       }`}
                     >
                       {contact.name}
@@ -272,7 +272,7 @@ export default function CryptoPage() {
               className={inputCls}
             />
             {payee && (
-              <p className="text-[12px] text-[#636366] mt-2 font-mono break-all">
+              <p className="text-[12px] text-muted mt-2 font-mono break-all">
                 {payee.name} · {payee.address}
               </p>
             )}
@@ -290,7 +290,7 @@ export default function CryptoPage() {
                     aria-pressed={active}
                     onClick={() => setSelectedSymbol(token.symbol)}
                     className={`h-9 px-4 rounded-full text-[13px] font-medium cursor-pointer ${
-                      active ? 'bg-[#1C1C1E] text-white' : 'text-[#636366]'
+                      active ? 'bg-ink text-white' : 'text-muted'
                     }`}
                   >
                     {token.symbol}
@@ -319,7 +319,7 @@ export default function CryptoPage() {
                 <span className="text-[14px] font-semibold tabular-nums">
                   {amount > 0 ? `${conversion.tokenAmount} ${selectedSymbol}` : '—'}
                 </span>
-                <span className="text-[12px] text-[#636366] tabular-nums">
+                <span className="text-[12px] text-muted tabular-nums">
                   1 {selectedSymbol} = {formatINR(selectedToken.inrRate)}
                 </span>
               </div>
@@ -375,7 +375,7 @@ export default function CryptoPage() {
               <div key={tx.id} className="px-5 py-3.5 flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-[15px] font-medium truncate">{tx.recipientName}</p>
-                  <p className="text-[13px] text-[#636366] truncate">
+                  <p className="text-[13px] text-muted truncate">
                     {tx.recipientHandle || shortAddress(tx.recipientAddress)} · {tx.timestamp}
                   </p>
                 </div>
